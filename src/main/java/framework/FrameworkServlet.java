@@ -1,0 +1,70 @@
+package framework;
+
+import java.io.IOException;
+import java.lang.reflect.InvocationTargetException;
+import java.lang.reflect.Method;
+
+import javax.servlet.ServletConfig;
+import javax.servlet.ServletContext;
+import javax.servlet.ServletException;
+import javax.servlet.http.HttpServlet;
+import javax.servlet.http.HttpServletRequest;
+import javax.servlet.http.HttpServletResponse;
+
+public class FrameworkServlet extends HttpServlet {
+
+	private static final long serialVersionUID = 1L;
+
+	public static Object application;
+
+	@Override
+	public void init(ServletConfig config) throws ServletException {
+		try {
+			super.init(config);
+			Class<?> appClass = Thread.currentThread().getContextClassLoader().loadClass("services.Application");
+			application = appClass.newInstance();
+			application.getClass().getMethod("start").invoke(application);
+		} catch (Exception e) {
+			throw new ServletException("Problem when creating application instance", e);
+		}
+	}
+
+	@Override
+	public void destroy() {
+		try {
+			application.getClass().getMethod("stop").invoke(application);
+		} catch (Exception e) {
+			e.printStackTrace();
+		}
+	}
+
+	@Override
+	protected void service(HttpServletRequest req, HttpServletResponse resp) throws ServletException, IOException {
+		try {
+			Class<?> controllerClass = Thread.currentThread().getContextClassLoader().loadClass("framework.FrontController");
+			Object controller = controllerClass.newInstance();
+			invoke("service", controller, req, resp, getServletContext());
+		} catch (Exception e) {
+			// TODO WTF?
+			Throwable cause = e;
+			if (e.getCause() != null) {
+				cause = e.getCause();
+			}
+			if (cause.getCause() != null) {
+				cause = cause.getCause();
+			}
+			if (cause instanceof ClientException) {
+				resp.sendError(400, cause.getMessage());
+			} else {
+				throw new ServletException(cause .getMessage(), cause );
+			}
+		}
+	}
+
+	private void invoke(String methodName, Object controller, HttpServletRequest req, HttpServletResponse resp, ServletContext ctx) throws SecurityException,
+			NoSuchMethodException, IllegalArgumentException, IllegalAccessException, InvocationTargetException {
+		Method method = controller.getClass().getMethod(methodName, HttpServletRequest.class, HttpServletResponse.class, ServletContext.class);
+		method.invoke(controller, req, resp, ctx);
+	}
+
+}

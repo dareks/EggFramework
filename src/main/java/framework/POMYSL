@@ -1,0 +1,34 @@
+Niech ten framework nazywa sie EGG FRAMEWORK! :)
+
++ Dokumentacja po inglishu
++ GIT HUB
++ Full stack framework (ciągle brakuje ORMa oraz walidacji)
+
+
+________________
+
+
+WALIIDACJA
+
+http://edgeguides.rubyonrails.org/active_record_validations_callbacks.html
+
+* jeden sposob walidacji encji (baza danych), formularzy (kontrolery) oraz parametrow uslug(!!!!!!!!)
+* metody statyczne w GlobalHelpers.* :) 
+
+
+----
+
+SUPER POMYSL NA HELPERy:
+
+* helpery mogą przyjmować kawałek strony jako parametr:
+ <% someMethod({ %>
+	JAKIS KAWALEK LENIWIE EWOLUOWANY
+ <% }) %>
+ 
+someMethod({ out.write("Jakis kawalek leniwie ewoluowany"); })
+
+* Java helper:
+public void someMethod(Closure closure) {
+	if (true) closure.call();
+}
+

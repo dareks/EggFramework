@@ -1,0 +1,23 @@
+WEJSCE						ZMIANA		NA EKRAN
+
+START						s = 0		out.write("
+< && s == 0					s = 1		");
+% && s == 1 				s = 2 		
+dowolny && s == 1			s = 0		out.write("< oraz funkcja dowolny()
+= && s == 2					s = 3		out.write("" +
+% && s == 2					s = 4		
+% && s == 3					s = 5		
+> && s == 4					s = 0		; out.write("
+> && s == 5					s = 0		); out.write("
+dowolny && s == 4 			s = 2		%
+dowolny && s == 5			s = 3		%
+dowolny									funkcja dowolny()
+KONIEC && s = 0							");
+
+
+
+funkcja dowolny():
+\r || \n								nic (chyba ze state != 2 to wtedy \\n)
+" && state !=3							\"
+dowolny									dowolny
+

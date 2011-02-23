@@ -1,0 +1,54 @@
+body {
+	font: 11pt/1.556 'Linux Libertine',Palatino,'Palatino Linotype','Book Antiqua',Georgia,'Times New Roman',serif;
+	word-spacing: .1em;
+}
+
+/** To jest skopiowane z body! */
+td {
+	font: 11pt/1.556 'Linux Libertine',Palatino,'Palatino Linotype','Book Antiqua',Georgia,'Times New Roman',serif;
+	word-spacing: .1em;
+}
+
+p {
+	background-color: #fafafa;
+	border: #eaeaea solid 1px;
+	padding: 10px;
+	margin: 5px;
+}
+
+a {
+	color: blue;
+}
+
+img {
+	border: #eaeaea dotted 5px;
+}
+
+#popup {
+	background-color: #fafafa;
+	border: #eaeaea solid 1px;
+}
+
+#popup thead td {
+	font-family: 'Essays 1743', Palatino, 'Palatino Linotype',
+		'Book Antiqua', Georgia, 'Times New Roman', serif;
+	font-weight: normal;
+	text-transform: uppercase;
+	text-shadow: 0 0 1px #667;
+	background: #f6f6f6;
+	padding-left: 20px;
+}
+
+#popup td {
+	padding: 10px;
+}
+
+#errors {
+	background-color: #fff0f0;
+	border: #eaeaea solid 1px;
+}
+
+#messages {
+	background-color: #f0fff0;
+	border: #eaeaea solid 1px;
+}
