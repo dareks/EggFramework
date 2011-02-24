@@ -24,16 +24,16 @@ public class ReloadingServer {
 			if (!file.contains("commons-jci")) {
 				if (file.endsWith(".jar")) {
 					pParent.addResourceStore(new JarResourceStore(file));
-				} else {
+				} else {   
 					pParent.addResourceStore(new FileResourceStore(new File(file)));
 				}
 			}
 		}
 		Thread.currentThread().setContextClassLoader(loader);
 
-		String classesDir = new File("target/classes").getAbsolutePath();
+		String classesDir = new File("target/classes").getAbsolutePath();                
 		int mask = JNotify.FILE_CREATED | JNotify.FILE_DELETED | JNotify.FILE_MODIFIED | JNotify.FILE_RENAMED;
-		boolean watchSubtree = true;
+		boolean watchSubtree = true; 
 		try {
 			int watchID = JNotify.addWatch(classesDir, mask, watchSubtree, new JNotifyAdapter() {
 				@Override
@@ -43,24 +43,27 @@ public class ReloadingServer {
 					}
 				}
 			});
-		} catch (Exception e) {
-			e.printStackTrace();
+		} catch (Exception e) {                
+			e.printStackTrace();         
 		}
 		startJetty();
-		while (true) {
-			try {
+		while (true) { 
+			try { 
 				Thread.sleep(400);
 			} catch (InterruptedException e) {
 				break;
 			}
-			if (modified) {
-				stopJetty();
-				ReloadingClassLoader contextClassLoader = (ReloadingClassLoader) Thread.currentThread().getContextClassLoader();
-				ReloadingClassLoader parent = (ReloadingClassLoader) contextClassLoader.getParent();
-				parent.handleNotification();
-				Thread.currentThread().setContextClassLoader(new ReloadingClassLoader(parent));
-				startJetty();
-				modified = false;
+			synchronized (ReloadingServer.class) {
+				if (modified) {
+					stopJetty();  
+					ReloadingClassLoader contextClassLoader = (ReloadingClassLoader) Thread.currentThread().getContextClassLoader();
+					contextClassLoader.handleNotification(); 
+					ReloadingClassLoader parent = (ReloadingClassLoader) contextClassLoader.getParent();
+					parent.handleNotification();
+					Thread.currentThread().setContextClassLoader(new ReloadingClassLoader(parent));
+					startJetty();
+					modified = false;
+				}
 			}
 		}
 	}

@@ -1,5 +1,7 @@
 package framework;
 
+//import groovy.lang.Binding;
+//import groovy.util.GroovyScriptEngine;
 import groovy.lang.Binding;
 import groovy.util.GroovyScriptEngine;
 import groovy.util.ResourceException;
@@ -13,43 +15,61 @@ import java.io.IOException;
 import java.io.PrintWriter;
 import java.io.Writer;
 import java.util.HashMap;
+import java.util.Hashtable;
 import java.util.Map;
 
 public class Template {
 
+	// TODO USE GroovyClassLoader on production instead
 	private static GroovyScriptEngine gse;
+	private static Map<String, Long> filemodificationDates = new Hashtable<String, Long>();
 	
 	static {
-		try {
+		try { 
 			gse = new GroovyScriptEngine(new String[] { "" });
 		} catch (IOException e) {
 			e.printStackTrace();
-		}
-	}
+		} 
+	} 
 	
 	public static void render(String template, Map<String, Object> model, Writer writer) throws IOException, ResourceException, ScriptException {
-		File file = new File("target/classes/" + template + ".html");
-		if (!file.exists()) {
-			throw new IOException("Template " + template + " does not exist");
-		}
 		new File("target/generated").mkdirs(); 
 		if (template.contains("/")) {
 			new File("target/generated/" + template.substring(0, template.lastIndexOf("/"))).mkdirs();
 		}
-		String groovySourceFile = "target/generated/" + template + ".groovy";
-		FileWriter generatedSourceWriter = new FileWriter(groovySourceFile);
-		try {
-			parse(file, generatedSourceWriter);
-		} finally {
-			generatedSourceWriter.close();
-		}
+		String groovySourceFile = generateSourceFile(template);
 		Binding binding = new Binding();
 		if (model != null) {
 			for (String key : model.keySet()) {
 				binding.setVariable(key, model.get(key));
 			}
 		}
+		long started = System.currentTimeMillis();
 		gse.run(groovySourceFile, binding);
+		System.out.println("---- Time spent in rendering template " + template + " is " + (System.currentTimeMillis() - started)  + " ms");
+	}
+
+	private static String generateSourceFile(String template) 
+			throws IOException, FileNotFoundException {
+		String groovySourceFile = "target/generated/" + template + ".groovy";
+		File file = new File("target/classes/" + template + ".html");
+		if (!file.exists()) {
+			throw new IOException("Template " + template + " does not exist");
+		}
+		
+		final String name = file.getName();
+		Long date = filemodificationDates.get(name);
+		long lastModified = file.lastModified();
+		if (date == null || date < lastModified) {
+			FileWriter generatedSourceWriter = new FileWriter(groovySourceFile);
+			try {
+				parse(file, generatedSourceWriter);
+			} finally {
+				generatedSourceWriter.close();
+			} 
+			filemodificationDates.put(name, lastModified);
+		} 
+		return groovySourceFile;
 	}
 
 	public static void main(String[] args) throws IOException, ResourceException, ScriptException {
@@ -105,7 +125,7 @@ public class Template {
 		} finally {
 			reader.close();
 		}
-	}
+	} 
 
 	private static void addChar(Writer writer, int s, int ch) throws IOException {
 		if (ch == '\r' || ch == '\n') {

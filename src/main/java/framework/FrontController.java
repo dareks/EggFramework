@@ -44,13 +44,14 @@ public class FrontController {
 			data.request.set("errors", errors);
 			data.request.set("messages", new ArrayList<String>());
 			data.request.set(data.flash.pop()); // Flash attributes are automatically inserted into attributes
+			initClass(path);
 			runBefore(path, data);
 			ActionValidationConfig validationsConfig = ActionValidationConfig.get(path);
 			validationsConfig.validate(data.params, errors);
-			data.request.set("errors", errors);
+			data.request.set("errors", errors); 
 			if (errors.hasErrors()) {
 				path = "/index"; // TODO GET PATH FROM CONFIG
-			} else {
+			} else { 
 				Response response = runAction(path, data);
 				if (response != null) {
 					if (response.forward != null) {
@@ -71,6 +72,18 @@ public class FrontController {
 		}
 	}
 	
+	/**
+	 * Initializes controller class - static block will be executed
+	 */
+	private void initClass(String path) throws ServletException {
+		String classForPath = classForPath(path);
+		try {
+			Class.forName(classForPath, true, Thread.currentThread().getContextClassLoader());
+		} catch (ClassNotFoundException e) {
+			throw new ServletException(e.getMessage(), e);
+		}		
+	}
+
 	private String classForPath(String path) {
 		if (!path.substring(1).contains("/")) {
 			return "controllers.IndexController";
@@ -94,7 +107,7 @@ public class FrontController {
 
 	private Response runAction(String path, ThreadData data) throws ServletException {
 		try {
-			Action action = findAction(classForPath(path), path.substring(1));
+			Action action = findAction(classForPath(path), path.substring(path.lastIndexOf('/') + 1));
 			if (action != null) {
 				return action.execute(data);
 			}

@@ -18,6 +18,7 @@ import javax.servlet.http.Cookie;
 
 import org.apache.commons.beanutils.BeanUtils;
 
+import com.google.code.morphia.utils.ReflectionUtils;
 import com.google.common.collect.ImmutableMap;
 import com.google.common.collect.Lists;
 import com.google.common.collect.Maps;
@@ -189,8 +190,15 @@ public class GlobalHelpers {
 	}
 
 	public static ActionValidationConfig validateParams(String action, Class<?> clazz) {
+		String controllerClass = getRefererClass();
 		ObjectValidationConfig config = ObjectValidationConfig.get(clazz.getName());
-		return ActionValidationConfig.get(action).setValidators(config.getValidators());
+		String path = createPath(controllerClass, action);
+		return ActionValidationConfig.get(path).setValidators(config.getValidators());
+	}
+	
+	public static String createPath(String controllerClassName, String action) {
+		String path = "/" + controllerClassName.substring(controllerClassName.lastIndexOf('.') + 1, controllerClassName.indexOf("Controller")) + "/" + action;
+		return path.substring(0, 2).toLowerCase() + path.substring(2);
 	}
 
 	public static Errors validateParams(Class<?> clazz) {
@@ -304,6 +312,8 @@ public class GlobalHelpers {
 			} else {
 				return null;
 			}
+		} catch (ClassNotFoundException e) {
+			return null;
 		} catch (Exception e) {
 			throw new RuntimeException(e.getMessage(), e);
 		}
