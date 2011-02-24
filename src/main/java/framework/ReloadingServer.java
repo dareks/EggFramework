@@ -11,6 +11,12 @@ import net.contentobjects.jnotify.JNotifyAdapter;
 import org.apache.commons.jci.ReloadingClassLoader;
 import org.apache.commons.jci.stores.FileResourceStore;
 
+/**
+ * Run this class in order to run a web server with you application. Remember to specify java.library.path JVM 
+ * option pointing to libs directory (-Djava.library.path=libs). 
+ * 
+ * @author Jacek Olszak
+ */
 public class ReloadingServer {
 
 	private volatile boolean modified;
