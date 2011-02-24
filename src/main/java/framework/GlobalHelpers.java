@@ -1,7 +1,5 @@
 package framework;
 
-import java.beans.Beans;
-import java.beans.beancontext.BeanContextSupport;
 import java.io.File;
 import java.io.FilenameFilter;
 import java.io.IOException;
@@ -10,19 +8,13 @@ import java.io.Writer;
 import java.lang.reflect.Field;
 import java.lang.reflect.Method;
 import java.math.BigDecimal;
-import java.util.List;
 import java.util.Map;
-import java.util.Map.Entry;
 
 import javax.servlet.http.Cookie;
 
 import org.apache.commons.beanutils.BeanUtils;
 
-import com.google.code.morphia.utils.ReflectionUtils;
-import com.google.common.collect.ImmutableMap;
-import com.google.common.collect.Lists;
 import com.google.common.collect.Maps;
-import com.sun.org.apache.bcel.internal.generic.Type;
 
 import framework.validation.ActionValidationConfig;
 import framework.validation.DecimalNumberValidator;
@@ -33,8 +25,8 @@ import groovy.lang.Closure;
 
 public class GlobalHelpers {
 
-	public static String link(String action, String text) {
-		return String.format("<a href='%s%s.html'>%s</a>", config("app.url"), action, text);
+	public static String link(String controller, String action, String text) {
+		return String.format("<a href='%s%s/%s.html'>%s</a>", config("app.url"), controller, action, text);
 	}
 
 	public static String resource(String name) {
