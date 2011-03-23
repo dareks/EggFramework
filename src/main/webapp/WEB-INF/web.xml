@@ -7,9 +7,19 @@
 		<servlet-class>framework.FrameworkServlet</servlet-class>
 	</servlet>
 	
+	<servlet>
+		<servlet-name>amfGateway</servlet-name>
+		<servlet-class>framework.AMFGateway</servlet-class>
+	</servlet>
+	
 	<servlet-mapping>
 		<servlet-name>front</servlet-name>
 		<url-pattern>*.html</url-pattern>
+	</servlet-mapping>
+	
+	<servlet-mapping>
+		<servlet-name>amfGateway</servlet-name>
+		<url-pattern>/amfGateway</url-pattern>
 	</servlet-mapping>
 	
 	<welcome-file-list>

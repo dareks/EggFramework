@@ -43,4 +43,10 @@ public class Errors {
 	public List<String> getMessages(String field) {
 		return messages.get(field);
 	}
+
+	@Override
+	public String toString() {
+		return "Errors [messages=" + messages + "]";
+	}
+	
 }

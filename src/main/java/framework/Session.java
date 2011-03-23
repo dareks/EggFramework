@@ -1,5 +1,7 @@
 package framework;
 
+import java.util.Enumeration;
+
 import javax.servlet.http.HttpServletRequest;
 import javax.servlet.http.HttpSession;
 
@@ -15,6 +17,13 @@ public class Session {
 		request.getSession().setAttribute(key, value);
 		return this;
 	}
+	
+	public void invalidate() {
+		HttpSession session = request.getSession(false);
+		if (session != null) {
+			session.invalidate();
+		}
+	}
 
 	public <T> T get(String key) {
 		HttpSession session = request.getSession(false);
@@ -22,6 +31,20 @@ public class Session {
 			return (T) session.getAttribute(key);
 		}
 		return null;
+	}
+	
+	@Override
+	public String toString() {
+		StringBuilder builder = new StringBuilder("{<br />\n");
+		HttpSession session = request.getSession(false);
+		if (session != null) {
+			Enumeration names = session.getAttributeNames();
+			while(names.hasMoreElements()) {
+				String name = (String) names.nextElement();
+				builder.append(" &nbsp; ").append(name).append(" = ").append(session.getAttribute(name)).append("<br />\n");
+			}
+		}
+		return builder.append("}").toString();
 	}
 
 }

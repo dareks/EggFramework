@@ -8,11 +8,16 @@ import java.io.Writer;
 import java.lang.reflect.Field;
 import java.lang.reflect.Method;
 import java.math.BigDecimal;
+import java.net.URLEncoder;
+import java.util.HashMap;
 import java.util.Map;
+import java.util.Map.Entry;
+import java.util.Set;
 
 import javax.servlet.http.Cookie;
 
 import org.apache.commons.beanutils.BeanUtils;
+import org.codehaus.jackson.map.ObjectMapper;
 
 import com.google.common.collect.Maps;
 
@@ -25,12 +30,54 @@ import groovy.lang.Closure;
 
 public class GlobalHelpers {
 
+	public static final String ACTION_RETURNED_OBJECT = "Egg.ACTION_RETURNED_OBJECT";
+	public static final String ACTION_URI = "Egg.ACTION_URI";
+	public static final String ACTION_DATA = "Egg.ACTION_DATA";
+	
+	/**
+	 * Generates link (&lt;a href...&gt;) to action in current controller
+	 */
+	public static String link(String action, String text) {
+		return link(action, text, new HashMap<String, Object>());
+	}
+	
+	public static String generateQueryString(Map<String, Object> params) {
+		StringBuilder builder = new StringBuilder("?");
+		try {
+			for (Entry<String, Object> entry : params.entrySet()) {
+				builder.append(URLEncoder.encode(entry.getKey(), "iso-8859-1"));
+				builder.append("=");
+				builder.append(URLEncoder.encode(String.valueOf(entry.getValue()), "iso-8859-1"));
+				builder.append("&");
+			}
+			return builder.toString();
+		} catch (Exception e) {
+			e.printStackTrace();
+			return e.getMessage();
+		}
+	}
+
+	public static String link(String action, String text, Map<String, Object> params) {
+		return String.format("<a href='%s%s/%s.html%s'>%s</a>", config("app.url"), req().getController(), action, generateQueryString(params), text);
+	}
+
+	/**
+	 * Generates link (&lt;a href...&gt;)
+	 */
 	public static String link(String controller, String action, String text) {
 		return String.format("<a href='%s%s/%s.html'>%s</a>", config("app.url"), controller, action, text);
 	}
-
+	
+	public static String action(String action) {
+		return String.format("%s%s/%s.html", config("app.url"), req().getController(), action);
+	}
+	
+	public static String action(String controller, String action) {
+		return String.format("%s%s/%s.html", config("app.url"), controller, action);
+	}
+	
 	public static String resource(String name) {
-		return String.format("%s%s", config("app.url") + "resources/", name);
+		return String.format("%s%s%s", Config.get("app.url"), "resources/", name);
 	}
 
 	public static String config(String key) {
@@ -57,10 +104,53 @@ public class GlobalHelpers {
 		return String.format(str, args);
 	}
 
-	public static Response render(String action) {
+	public static Response renderAction(String controller, String action) {
 		Response response = new Response();
-		response.forward = action;
+		response.action = "/" + controller + "/" + action + ".html";
 		return response;
+	}
+
+	public static Response renderAction(String action) {
+		return renderAction("/" + req().getController(), action);
+	}
+
+	public static Response renderPartial(String partial) {
+		Response response = new Response();
+		response.template = "/" + req().getController() + "/" + partial;
+		response.partial = true;
+		System.out.println(response.template);
+		return response;
+	}
+
+	public static Response render(String template) {
+		Response response = new Response();
+		response.template = "/" + req().getController() + "/" + template;
+		return response;
+	}
+
+	public static Response renderText(String text) {
+		Response response = new Response();
+		response.contentType = "text/plain; charset=utf-8";
+		response.text = text;
+		return response;
+	}
+	
+	// TODO Optimize
+	public static Response renderJSON(Object object) {
+		Response response = new Response();
+		response.contentType = "text/plain; charset=utf-8";
+		response.text = toJSON(object);
+		return response;
+	}
+	
+	// TODO Optimize
+	public static String toJSON(Object object) {
+		try{
+			return new ObjectMapper().writeValueAsString(object);
+		} catch (Exception e) {
+			e.printStackTrace();
+			return e.getMessage();
+		}
 	}
 
 	public static Redirect redirect() {
@@ -78,21 +168,21 @@ public class GlobalHelpers {
 	public static <T> T attr(String key) {
 		return req().get(key);
 	}
-	
+
 	public static Flash flash(String key, Object value) {
 		return flash().set(key, value);
 	}
-	
+
 	public static <T> T flash(String key) {
 		return flash().get(key);
 	}
 
 	public static Writer out() {
-		return FrontController.threadData.get().out;
+		return FrontController.threadData.get().getOut();
 	}
 
 	public static void out(String f, Object... args) throws IOException {
-		FrontController.threadData.get().out.write(f(f, args));
+		FrontController.threadData.get().getOut().write(f(f, args));
 	}
 
 	public static Params params() {
@@ -103,8 +193,24 @@ public class GlobalHelpers {
 		return FrontController.threadData.get().params.get(name);
 	}
 
+	public static String session(String name) {
+		return FrontController.threadData.get().session.get(name);
+	}
+
+	public static <T> Session session(String name, T value) {
+		return FrontController.threadData.get().session.set(name, value);
+	}
+	
+	public static Session session() {
+		return FrontController.threadData.get().session;
+	}
+
 	public static long paramAsLong(String name) {
 		return Long.valueOf(param(name));
+	}
+
+	public static int paramAsInt(String name) {
+		return Integer.valueOf(param(name));
 	}
 
 	// TODO WHAT ABOUT NESTED PROPERTIES?
@@ -155,7 +261,7 @@ public class GlobalHelpers {
 	}
 
 	// validation methods
-	
+
 	public static Validator required(String field) {
 		return registerValidator(field, requiredValidator);
 	}
@@ -174,7 +280,7 @@ public class GlobalHelpers {
 	}
 
 	public static DecimalNumberValidator decimalNumber(String field) {
-		return registerValidator(field, decimalNumberValidator);
+		return registerValidator(field, new DecimalNumberValidator());
 	}
 
 	public static Errors validate(Object o) {
@@ -187,7 +293,7 @@ public class GlobalHelpers {
 		String path = createPath(controllerClass, action);
 		return ActionValidationConfig.get(path).setValidators(config.getValidators());
 	}
-	
+
 	public static String createPath(String controllerClassName, String action) {
 		String path = "/" + controllerClassName.substring(controllerClassName.lastIndexOf('.') + 1, controllerClassName.indexOf("Controller")) + "/" + action;
 		return path.substring(0, 2).toLowerCase() + path.substring(2);
@@ -208,7 +314,9 @@ public class GlobalHelpers {
 	}
 
 	public static ActionValidationConfig validateParam(String action, String name, Validator... validators) {
-		return ActionValidationConfig.get(action).add(name, validators);
+		String controllerClass = getRefererClass();
+		String controller = uncapitalize(controllerClass.substring(controllerClass.lastIndexOf('.') + 1, controllerClass.indexOf("Controller")));
+		return ActionValidationConfig.get("/" + controller + "/" + action).add(name, validators);
 	}
 
 	public static Errors validateParam(String name, Validator... validators) {
@@ -230,10 +338,7 @@ public class GlobalHelpers {
 		}
 	};
 
-	public static final DecimalNumberValidator decimalNumberValidator = new DecimalNumberValidator();
-
 	// end of validation
-	
 
 	// REFLECTION METHODS
 
@@ -261,10 +366,12 @@ public class GlobalHelpers {
 			if (field != null) {
 				field.setAccessible(true);
 				Class<?> type = field.getType();
-				if (value != null && !type.equals(value.getClass())) {	
+				if (value != null && !type.equals(value.getClass())) {
 					// TODO conversion
 					if (type.equals(String.class)) {
 						value = String.valueOf(value);
+					} else if (type.equals(short.class) || type.equals(Short.class)) {
+						value = Short.valueOf(String.valueOf(value));
 					} else if (type.equals(int.class) || type.equals(Integer.class)) {
 						value = Integer.valueOf(String.valueOf(value));
 					} else if (type.equals(long.class) || type.equals(Long.class)) {
@@ -328,17 +435,31 @@ public class GlobalHelpers {
 		}
 		return classes;
 	}
+
+	public static Field findInheritedField(Class<?> clazz, String name) {
+		Field[] fields = clazz.getDeclaredFields();
+		for (Field field : fields) {
+			if (field.getName().equals(name)) {
+				return field;
+			}
+		}
+		if (!clazz.equals(Object.class)) {
+			return findInheritedField(clazz.getSuperclass(), name);
+		}
+		return null;
+	}
+
 	// end of reflection methods
 
 	// closure functions
 
 	public static String call(Closure closure) {
-		Writer currentWriter = FrontController.threadData.get().out;
+		Writer currentWriter = FrontController.threadData.get().getOut();
 		StringWriter stringWriter = new StringWriter();
-		FrontController.threadData.get().out = stringWriter;
+		FrontController.threadData.get().setOut(stringWriter);
 		closure.call();
 		stringWriter.flush();
-		FrontController.threadData.get().out = currentWriter;
+		FrontController.threadData.get().setOut(currentWriter);
 		return stringWriter.toString();
 	}
 
@@ -356,4 +477,50 @@ public class GlobalHelpers {
 		}
 		return map;
 	}
+
+	public static void vardump() throws IOException {
+		Set<Entry<String, Object>> entrySet = req().getAttributes().entrySet();
+		for (Entry<String, Object> entry : entrySet) {
+			out().append("<b>").append(entry.getKey()).append("</b>").append(" = ").append(String.valueOf(entry.getValue())).append("<br />");
+		}
+	}
+
+	public static String capitalize(Object o) {
+		String str = String.valueOf(o);
+		return str.substring(0, 1).toUpperCase() + str.substring(1);
+	}
+	
+	public static String uncapitalize(Object o) {
+		String str = String.valueOf(o);
+		return str.substring(0, 1).toLowerCase() + str.substring(1);
+	}
+	
+	
+	public static String setCharAt(String str, int pos, char ch) {
+		return str.substring(0, Math.min(pos, str.length())) + ch + str.substring(Math.min(pos + 1, str.length())); 
+	}
+	
+	public static boolean containsReference(Object[] array, Object o) {
+		if (array != null) {
+			for (Object object : array) {
+				if (object == o) {
+					return true;
+				}
+			}
+		}
+		return false;
+	}
+	
+	public static String nvl(Object obj) {
+		return obj == null ? "" : obj.toString();
+	}
+	
+	public static int sum(Iterable<Integer> numbers) {
+		int result = 0;
+		for (Integer integer : numbers) {
+			result += integer;
+		}
+		return result;
+	}
+	
 }

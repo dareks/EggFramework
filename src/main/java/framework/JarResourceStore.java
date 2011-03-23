@@ -2,6 +2,7 @@ package framework;
 
 import java.io.IOException;
 import java.io.InputStream;
+import java.net.URLDecoder;
 import java.util.jar.JarEntry;
 import java.util.jar.JarFile;
 
@@ -22,7 +23,7 @@ public class JarResourceStore implements ResourceStore {
 	public synchronized byte[] read(String pResourceName) {
 		JarFile jar = null;
 		try {
-			jar = new JarFile(filename);  
+			jar = new JarFile(URLDecoder.decode(filename, "utf-8"));  
 			JarEntry jarEntry = jar.getJarEntry(pResourceName);
 			if (jarEntry != null) {
 

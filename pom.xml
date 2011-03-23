@@ -43,5 +43,22 @@
 			<artifactId>commons-beanutils</artifactId>
 			<version>1.8.3</version>
 		</dependency>
+		<!-- Jackson for JSON serialization -->
+		<dependency>
+		    <groupId>org.codehaus.jackson</groupId>
+		    <artifactId>jackson-mapper-asl</artifactId>
+		    <version>1.6.4</version>
+		</dependency>
+		<!-- BlazeDS depedencies for integration with Flash/Flex -->
+		<dependency>
+		    <groupId>com.adobe.blazeds</groupId>
+		    <artifactId>blazeds-common</artifactId>
+		    <version>3.2.0.3978</version>
+		</dependency>
+		<dependency>
+		    <groupId>com.adobe.blazeds</groupId>
+		    <artifactId>blazeds-core</artifactId>
+		    <version>3.2.0.3978</version>
+		</dependency>
 	</dependencies>
 </project>

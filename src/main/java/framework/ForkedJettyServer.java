@@ -1,6 +1,9 @@
 package framework;
 
+import java.io.File;
+
 import org.eclipse.jetty.server.Server;
+import org.eclipse.jetty.server.session.HashSessionManager;
 import org.eclipse.jetty.webapp.WebAppContext;
 
 public class ForkedJettyServer {
@@ -13,7 +16,12 @@ public class ForkedJettyServer {
 		}
 		server = new Server(8080);
 		WebAppContext ctx = new WebAppContext();
-		ctx.setContextPath("/");
+		HashSessionManager sessionManager = (HashSessionManager) ctx.getSessionHandler().getSessionManager();
+		sessionManager.setSavePeriod(1);
+		sessionManager.setStoreDirectory(new File("target/sessions"));
+		ctx.getInitParams().put("org.eclipse.jetty.servlet.Default.useFileMappedBuffer", "false"); // this should be only on Windows
+		ctx.getInitParams().put("org.eclipse.jetty.servlet.Default.maxCachedFiles", "0");
+		ctx.setContextPath("/"); 
 		ctx.setResourceBase("src/main/webapp");
 		ctx.setClassLoader(Thread.currentThread().getContextClassLoader());
 		server.setHandler(ctx);

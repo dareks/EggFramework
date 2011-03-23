@@ -1,6 +1,6 @@
 package framework.validation;
 
-import static framework.GlobalHelpers.params;
+import static framework.GlobalHelpers.*;
 
 import java.util.ArrayList;
 import java.util.List;
@@ -9,7 +9,6 @@ import java.util.Map.Entry;
 import java.util.Set;
 
 import com.google.common.collect.Maps;
-import com.sun.swing.internal.plaf.synth.resources.synth;
 
 import framework.Params;
 
@@ -19,6 +18,9 @@ public class ActionValidationConfig {
 			.newHashMap();
 
 	private Map<String, List<Validator>> validators = Maps.newHashMap();
+
+	String inputController;
+	String inputAction;
 
 	public static ActionValidationConfig get(String path) {
 		synchronized (ActionValidationConfig.class) {
@@ -65,5 +67,20 @@ public class ActionValidationConfig {
 		this.validators = validators;
 		return this;
 	}
+	
+	public void input(String action) {
+		this.inputController = null;
+		this.inputAction = action;
+	}
 
+	public void input(String controller, String action) {
+		this.inputController = controller;
+		this.inputAction = action;
+	}
+
+	public String getInputPath() {
+		String controller = inputController != null ? inputController : req().getController();
+		String action = inputAction != null ? inputAction : "index";
+		return f("/%s/%s", controller, action);
+	}
 }

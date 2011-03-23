@@ -3,7 +3,6 @@ package framework;
 import static framework.GlobalHelpers.*;
 
 import java.io.IOException;
-import java.io.PrintWriter;
 import java.io.StringWriter;
 import java.io.Writer;
 import java.util.ArrayList;
@@ -13,10 +12,6 @@ import javax.servlet.ServletContext;
 import javax.servlet.ServletException;
 import javax.servlet.http.HttpServletRequest;
 import javax.servlet.http.HttpServletResponse;
-
-import org.eclipse.jetty.util.StringUtil;
-
-import com.google.common.base.Strings;
 
 import framework.validation.ActionValidationConfig;
 import framework.validation.Errors;
@@ -29,44 +24,82 @@ public class FrontController {
 
 	public void service(HttpServletRequest req, HttpServletResponse res, ServletContext ctx) throws ServletException, IOException {
 		res.setCharacterEncoding("utf-8");
-		res.setContentType("text/html; charset=utf-8");
-		String path = req.getServletPath();
-		path = path.substring(0, path.indexOf('.'));
+		String path = (String) (req.getAttribute(ACTION_URI) != null ? req.getAttribute(ACTION_URI) : req.getServletPath().substring(0, req.getServletPath().indexOf('.')));
 
 		System.out.printf("\n------------------------------ %15s ------------------------------\n", path);
 		long started = System.currentTimeMillis();
 
-		PrintWriter out = res.getWriter();
-		ThreadData data = new ThreadData(req, res, out);
+		final String controller = getController(path);
+		final String action = getAction(path);
+		ThreadData data = new ThreadData(req, res, controller, action);
 		threadData.set(data);
+		
 		try {
-			Errors errors = new Errors();
+			Errors errors = data.request.get("errors");
+			if (errors == null) {
+				errors = new Errors();
+			}
 			data.request.set("errors", errors);
+			data.request.set("params", data.params);
 			data.request.set("messages", new ArrayList<String>());
-			data.request.set(data.flash.pop()); // Flash attributes are automatically inserted into attributes
+			data.request.set("flash", data.flash.pop());
+			data.request.set("session", data.session);
 			initClass(path);
-			runBefore(path, data);
-			ActionValidationConfig validationsConfig = ActionValidationConfig.get(path);
-			validationsConfig.validate(data.params, errors);
-			data.request.set("errors", errors); 
-			if (errors.hasErrors()) {
-				path = "/index"; // TODO GET PATH FROM CONFIG
-			} else { 
-				Response response = runAction(path, data);
+			Response response = runBefore(path, data);
+			if (response == null) {
+				if (!errors.hasErrors()) { 
+					ActionValidationConfig validationsConfig = ActionValidationConfig.get(path);
+					validationsConfig.validate(data.params, errors);
+					if (errors.hasErrors()) {
+						path = validationsConfig.getInputPath(); 
+						req.getRequestDispatcher(path + ".html").forward(req, res);
+						return;
+					}
+				}
+				response = runAction(path, data);
 				if (response != null) {
-					if (response.forward != null) {
-						path = response.forward;
+					if (response.action != null) {
+						req.getRequestDispatcher(response.action).forward(req, res);
+						return;
 					}
 					if (response.redirect != null) {
 						res.sendRedirect(response.redirect);
 						return;
 					}
 				}
+			} else {
+				if (response.action != null) {
+					req.getRequestDispatcher(response.action).forward(req, res);
+					return;
+				}
+				if (response.redirect != null) {
+					res.sendRedirect(response.redirect);
+					return;
+				}
 			}
-			Map<String, Object> model = data.request.attributes;
-			model.put("session", data.session);
-			renderView(out, model, path);
+			if (response != null) {
+				res.setContentType(response.contentType);
+			}
+			boolean servletIncluded = req.getAttribute(ACTION_URI) != null;
+			if (!servletIncluded && (response == null || response.template != null)) {
+				Map<String, Object> model = data.request.getAttributes();
+				String template = response != null ? response.template : path;
+				renderTemplate(res.getWriter(), model, template, response);
+			} else if (response != null && response.text != null) {
+				res.getWriter().print(response.text);
+			} else if (response != null && response.bytes != null) {
+				res.getOutputStream().write(response.bytes);
+				res.getOutputStream().flush();
+			} else if (servletIncluded) {
+				req.setAttribute(ACTION_RETURNED_OBJECT, response != null ? response.singleObject : null);
+			}
 			System.out.printf("------------------------------ %12d ms ------------------------------ \n", System.currentTimeMillis() - started);
+		} catch (IOException e) {
+			e.printStackTrace();
+			throw e;
+		} catch (ServletException e) {
+			e.printStackTrace();
+			throw e;
 		} finally {
 			threadData.remove();
 		}
@@ -80,25 +113,30 @@ public class FrontController {
 		try {
 			Class.forName(classForPath, true, Thread.currentThread().getContextClassLoader());
 		} catch (ClassNotFoundException e) {
-			throw new ServletException(e.getMessage(), e);
+			// No need to have a controller class
 		}		
 	}
-
-	private String classForPath(String path) {
-		if (!path.substring(1).contains("/")) {
-			return "controllers.IndexController";
-		} else {
-			String className = path.substring(1, path.lastIndexOf("/"));
-			return "controllers." + className.substring(0, 1).toUpperCase() + className.substring(1) + "Controller";
-		}
+	
+	private String getController(String path) throws ServletException {
+		return path.substring(1, path.lastIndexOf('/'));
 	}
 
-	private void runBefore(String path, ThreadData data) throws ServletException {
+	private String getAction(String path) {
+		return path.substring(path.lastIndexOf('/') + 1);
+	}
+	
+	private String classForPath(String path) {
+		String className = path.substring(1, path.lastIndexOf('/'));
+		return "controllers." + className.substring(0, 1).toUpperCase() + className.substring(1) + "Controller";
+	}
+
+	private Response runBefore(String path, ThreadData data) throws ServletException {
 		try {
 			Action before = findAction(classForPath(path), "before");
 			if (before != null) {
-				before.execute(data);
+				return before.execute(data);
 			}
+			return null;
 		} catch (Exception e) {
 			Throwable cause = e.getCause();
 			throw new ServletException("Problem executing the action " + path, cause);
@@ -107,7 +145,7 @@ public class FrontController {
 
 	private Response runAction(String path, ThreadData data) throws ServletException {
 		try {
-			Action action = findAction(classForPath(path), path.substring(path.lastIndexOf('/') + 1));
+			Action action = findAction(classForPath(path), getAction(path));
 			if (action != null) {
 				return action.execute(data);
 			}
@@ -118,14 +156,20 @@ public class FrontController {
 		}
 	}
 
-	private void renderView(Writer out, Map<String, Object> model, String path) throws ServletException {
+	private void renderTemplate(Writer out, Map<String, Object> model, String path, Response response) throws ServletException {
 		try {
 			StringWriter writer = new StringWriter();
-			threadData.get().out = writer;
+			threadData.get().setOut(writer);
 			Template.render(path, model, writer);
 			model.put("content", writer.toString());
-			threadData.get().out = out;
-			Template.render("layout", model, out);
+			threadData.get().setOut(out);
+			String layoutTemplate = "/" + getController(path) + "/layout";
+			boolean isPartial = (response != null && response.partial) || path.substring(path.lastIndexOf('/') + 1).charAt(0) == '_';
+			if (Template.exists(layoutTemplate) && !isPartial) {
+				Template.render(layoutTemplate, model, out);
+			} else {
+				out.write(writer.toString());
+			}
 		} catch (Exception e) {
 			throw new ServletException("Problem rendering the page " + path, e);
 		}

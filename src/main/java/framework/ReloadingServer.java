@@ -15,6 +15,9 @@ import org.apache.commons.jci.stores.FileResourceStore;
  * Run this class in order to run a web server with you application. Remember to specify java.library.path JVM 
  * option pointing to libs directory (-Djava.library.path=libs). 
  * 
+ * TODO Server does not need to be stopped every time class file change. This class should check also if application
+ * was started already. If it wasn't then do nothing
+ * 
  * @author Jacek Olszak
  */
 public class ReloadingServer {
@@ -28,7 +31,7 @@ public class ReloadingServer {
 		for (URL url : urlClassLoader.getURLs()) {
 			String file = url.getFile();
 			if (!file.contains("commons-jci")) {
-				if (file.endsWith(".jar")) {
+				if (file.endsWith(".jar") || file.endsWith("/web.xml") || file.endsWith(".properties")) {
 					pParent.addResourceStore(new JarResourceStore(file));
 				} else {   
 					pParent.addResourceStore(new FileResourceStore(new File(file)));

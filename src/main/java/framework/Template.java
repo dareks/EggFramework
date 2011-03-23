@@ -2,6 +2,7 @@ package framework;
 
 //import groovy.lang.Binding;
 //import groovy.util.GroovyScriptEngine;
+import static framework.GlobalHelpers.*;
 import groovy.lang.Binding;
 import groovy.util.GroovyScriptEngine;
 import groovy.util.ResourceException;
@@ -32,7 +33,14 @@ public class Template {
 		} 
 	} 
 	
+	public static boolean exists(String template) {
+		return new File("target/classes/" + template + ".html").exists();
+	}
+	
 	public static void render(String template, Map<String, Object> model, Writer writer) throws IOException, ResourceException, ScriptException {
+		if (!template.startsWith("/")) {
+			template = req().getController() + "/" + template;
+		}
 		new File("target/generated").mkdirs(); 
 		if (template.contains("/")) {
 			new File("target/generated/" + template.substring(0, template.lastIndexOf("/"))).mkdirs();
@@ -80,6 +88,7 @@ public class Template {
 	private static void parse(File file, Writer writer) throws FileNotFoundException, IOException {
 		writer.append("import static framework.GlobalHelpers.*\n");
 		writer.append("import static view.Helpers.*\n");
+		writer.append("import entities.*\n");
 		writer.append("framework.ThreadData data = framework.FrontController.threadData.get()\n");
 		FileReader reader = new FileReader(file);
 		try {
@@ -99,7 +108,10 @@ public class Template {
 				} else if (ch == '=' && s == 2) {
 					s = 3;
 					writer.append("data.out.write \"\" +");
-				} else if (ch == '%' && s == 2) {
+				} else if (s == 2) {
+					s = 6;
+					addChar(writer, s, ch);
+				} else if (ch == '%' && s == 6) {
 					s = 4;
 				} else if (ch == '%' && s == 3) {
 					s = 5;
@@ -128,8 +140,12 @@ public class Template {
 	} 
 
 	private static void addChar(Writer writer, int s, int ch) throws IOException {
-		if (ch == '\r' || ch == '\n') {
-			writer.write(" ");
+		if ((ch == '\r' || ch == '\n')) {
+			if (s == 0) {
+				writer.write("\\n");
+			} else {
+				writer.write(" ");
+			}
 		} else if (ch == '"' && s != 3) {
 			writer.append("\\\"");
 		} else if (ch == '$') {

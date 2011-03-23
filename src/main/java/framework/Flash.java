@@ -11,15 +11,16 @@ import com.google.common.collect.Maps;
 public class Flash {
 
 	HttpServletRequest request;
+	static final String PREFIX = "__flash_";
 	
 	public synchronized Flash set(String key, Object value) {
-		request.getSession().setAttribute(key, value);
+		request.getSession().setAttribute(PREFIX + key, value);
 		return this;
 	}
 	
 	public synchronized <T> T get(String key) {
 		if (request.getSession(false) != null) {
-			return (T) request.getSession().getAttribute(key);
+			return (T) request.getSession().getAttribute(PREFIX + key);
 		}
 		return null;
 	}
@@ -31,8 +32,10 @@ public class Flash {
 			Enumeration names = session.getAttributeNames();
 			while (names.hasMoreElements()) {
 				String key = (String) names.nextElement();
-				map.put(key, session.getAttribute(key));
-				session.removeAttribute(key);
+				if (key.startsWith(PREFIX)) {
+					map.put(key.substring(PREFIX.length()), session.getAttribute(key));
+					session.removeAttribute(key);
+				}
 			}
 		}
 		return map;
