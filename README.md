@@ -9,7 +9,7 @@ Full stack web application framework with following features
  * Simple, yet powerful view layer leveraging Groovy programming language
 
  
-Sample controller code
+Sample code
 ----------------------
 
 src/main/java/controllers/PostsController.java:
