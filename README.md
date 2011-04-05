@@ -14,7 +14,8 @@ Sample code
 
 src/main/java/controllers/PostsController.java:
 
-` public class PostsController {
+```java
+ public class PostsController {
     // executed for url: /game/postDetails?id=12
     // will render /game/postDetails.html
     public void postDetails() {
@@ -28,14 +29,15 @@ src/main/java/controllers/PostsController.java:
     public String flashAmfTest() {
       return "Hello from server :)";
 	}
-  }`
+  }
+```
   
 src/main/resources/posts/postDetails.html:
 
-`<code>
+```html
   <html>
   <body>
   	<%= post %>
   </body>
   </html>
-</code>`
+```
