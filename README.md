@@ -14,26 +14,26 @@ Sample code
 
 src/main/java/controllers/PostsController.java:
 
-  public class PostsController {
-    // executed for url: /game/postDetails?id=12
-    // will render /game/postDetails.html
-    public void postDetails() {
-      int id = paramAsInt("id");
-      Post post = ....
-      attr("post", post);
-    }
-    
-    // executed by Flash player using AMF HTTP
-    // will returnJava String as an ActionScript String
-    public String flashAmfTest() {
-      return "Hello from server :)";
+	public class PostsController {
+		// executed for url: /game/postDetails?id=12
+		// will render /game/postDetails.html
+		public void postDetails() {
+			int id = paramAsInt("id");
+			Post post = ....
+			attr("post", post);
+		}
+		
+		// executed by Flash player using AMF HTTP
+		// will returnJava String as an ActionScript String
+		public String flashAmfTest() {
+			return "Hello from server :)";
+		}
 	}
-  }
 
 src/main/resources/posts/postDetails.html:
 
-  <html>
-  <body>
-  	<%= post %>
-  </body>
-  </html>
+	<html>
+		<body>
+ 			<%= post %>
+		</body>
+	</html>
