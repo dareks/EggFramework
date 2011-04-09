@@ -181,7 +181,7 @@ public class GlobalHelpers {
 	}
 
 	public static <T> T attr(String key) {
-		return req().get(key);
+		return (T) req().get(key);
 	}
 
 	public static Flash flash(String key, Object value) {
