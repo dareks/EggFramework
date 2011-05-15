@@ -16,6 +16,7 @@
 package framework;
 
 import java.util.Map;
+import static framework.GlobalHelpers.*;
 
 public class Redirect {
 
@@ -24,9 +25,7 @@ public class Redirect {
 	}
 
 	public Response action(String action, Map<String, Object> params) {
-		Response redirect = new Response();
-		redirect.redirect = Config.get("app.url") + action + ".html";
-		return redirect;
+		return action(req().getController(), action, params);
 	}
 
 	public Response action(String controller, String action) {
@@ -37,7 +36,7 @@ public class Redirect {
 		Response redirect = new Response();
 		redirect.redirect = Config.get("app.url") + controller + "/" + action + ".html";
 		if (params != null) {
-			redirect.redirect += GlobalHelpers.generateQueryString(params);
+			redirect.redirect += generateQueryString(params);
 		}
 		return redirect;
 	}

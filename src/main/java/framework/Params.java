@@ -19,6 +19,8 @@ import java.util.Map;
 
 import javax.servlet.http.HttpServletRequest;
 
+import com.google.common.collect.Maps;
+
 public class Params {
 
 	HttpServletRequest request;
@@ -32,7 +34,7 @@ public class Params {
 	}
 	
 	public Map<String, String[]> getMap() {
-		return request.getParameterMap();
+		return Maps.newHashMap(request.getParameterMap());
 	}
 	
 }

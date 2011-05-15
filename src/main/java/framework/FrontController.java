@@ -17,6 +17,7 @@ package framework;
 
 import static framework.GlobalHelpers.*;
 
+import java.io.FileNotFoundException;
 import java.io.IOException;
 import java.io.StringWriter;
 import java.io.Writer;
@@ -40,9 +41,6 @@ public class FrontController {
 	public void service(HttpServletRequest req, HttpServletResponse res, ServletContext ctx) throws ServletException, IOException {
 		res.setCharacterEncoding("utf-8");
 		String path = (String) (req.getAttribute(ACTION_URI) != null ? req.getAttribute(ACTION_URI) : req.getServletPath().substring(0, req.getServletPath().indexOf('.')));
-
-		System.out.printf("\n------------------------------ %15s ------------------------------\n", path);
-		long started = System.currentTimeMillis();
 
 		final String controller = getController(path);
 		final String action = getAction(path);
@@ -108,7 +106,8 @@ public class FrontController {
 			} else if (servletIncluded) {
 				req.setAttribute(ACTION_RETURNED_OBJECT, response != null ? response.singleObject : null);
 			}
-			System.out.printf("------------------------------ %12d ms ------------------------------ \n", System.currentTimeMillis() - started);
+		} catch (FileNotFoundException e) {
+			res.sendError(404, e.getMessage());
 		} catch (IOException e) {
 			e.printStackTrace();
 			throw e;
@@ -166,25 +165,34 @@ public class FrontController {
 			}
 			return null;
 		} catch (Exception e) {
-			Throwable cause = e.getCause();
-			throw new ServletException("Problem executing the action " + path, cause);
+//			Throwable cause = e.getCause();
+			throw new ServletException("Problem executing the action " + path, e);
 		}
 	}
 
-	private void renderTemplate(Writer out, Map<String, Object> model, String path, Response response) throws ServletException {
+	private void renderTemplate(Writer out, Map<String, Object> model, String path, Response response) throws ServletException, FileNotFoundException {
 		try {
 			StringWriter writer = new StringWriter();
 			threadData.get().setOut(writer);
 			Template.render(path, model, writer);
 			model.put("content", writer.toString());
 			threadData.get().setOut(out);
-			String layoutTemplate = "/" + getController(path) + "/layout";
+			String layoutTemplate1 = "/" + getController(path) + "/layout";
+			String layoutTemplate2 = "/layout";
+			String layoutTemplate = null;
+			if (Template.exists(layoutTemplate1)) {
+				layoutTemplate = layoutTemplate1;
+			} else if (Template.exists(layoutTemplate2)) {
+				layoutTemplate = layoutTemplate2;
+			}
 			boolean isPartial = (response != null && response.partial) || path.substring(path.lastIndexOf('/') + 1).charAt(0) == '_';
-			if (Template.exists(layoutTemplate) && !isPartial) {
+			if (layoutTemplate != null && !isPartial) {
 				Template.render(layoutTemplate, model, out);
 			} else {
 				out.write(writer.toString());
 			}
+		} catch (FileNotFoundException e) {
+			throw e;
 		} catch (Exception e) {
 			throw new ServletException("Problem rendering the page " + path, e);
 		}

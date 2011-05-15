@@ -31,17 +31,17 @@ public class FrameworkServlet extends HttpServlet {
 	private static final long serialVersionUID = 1L;
 
 	public static Object application;
+	public boolean started;
 
-	@Override
-	public void init(ServletConfig config) throws ServletException {
-		try {
-			super.init(config);
-			Class<?> appClass = Thread.currentThread().getContextClassLoader().loadClass("services.Application");
-			application = appClass.newInstance();
-			application.getClass().getMethod("start").invoke(application);
-		} catch (Exception e) {
-			throw new ServletException("Problem when creating application instance", e);
-		}
+	private void createAndStartApplication() throws ServletException,
+			ClassNotFoundException, InstantiationException,
+			IllegalAccessException, InvocationTargetException,
+			NoSuchMethodException {
+		Class<?> appClass = Thread.currentThread().getContextClassLoader()
+				.loadClass("services.Application");
+		application = appClass.newInstance();
+		application.getClass().getMethod("start").invoke(application);
+		started = true;
 	}
 
 	@Override
@@ -54,9 +54,22 @@ public class FrameworkServlet extends HttpServlet {
 	}
 
 	@Override
-	protected void service(HttpServletRequest req, HttpServletResponse resp) throws ServletException, IOException {
+	protected void service(HttpServletRequest req, HttpServletResponse resp)
+			throws ServletException, IOException {
+		synchronized (this) { // bottleneck?
+			if (!started) {
+				try {
+					createAndStartApplication();
+				} catch (Exception e) {
+					throw new ServletException(
+							"Problem when creating application instance", e);
+				}
+			}
+		}
 		try {
-			Class<?> controllerClass = Thread.currentThread().getContextClassLoader().loadClass("framework.FrontController");
+			Class<?> controllerClass = Thread.currentThread()
+					.getContextClassLoader()
+					.loadClass("framework.FrontController");
 			Object controller = controllerClass.newInstance();
 			invoke("service", controller, req, resp, getServletContext());
 		} catch (Exception e) {
@@ -71,14 +84,19 @@ public class FrameworkServlet extends HttpServlet {
 			if (cause instanceof ClientException) {
 				resp.sendError(400, cause.getMessage());
 			} else {
-				throw new ServletException(cause .getMessage(), cause );
+				throw new ServletException(cause.getMessage(), cause);
 			}
 		}
 	}
 
-	private void invoke(String methodName, Object controller, HttpServletRequest req, HttpServletResponse resp, ServletContext ctx) throws SecurityException,
-			NoSuchMethodException, IllegalArgumentException, IllegalAccessException, InvocationTargetException {
-		Method method = controller.getClass().getMethod(methodName, HttpServletRequest.class, HttpServletResponse.class, ServletContext.class);
+	private void invoke(String methodName, Object controller,
+			HttpServletRequest req, HttpServletResponse resp, ServletContext ctx)
+			throws SecurityException, NoSuchMethodException,
+			IllegalArgumentException, IllegalAccessException,
+			InvocationTargetException {
+		Method method = controller.getClass().getMethod(methodName,
+				HttpServletRequest.class, HttpServletResponse.class,
+				ServletContext.class);
 		method.invoke(controller, req, resp, ctx);
 	}
 

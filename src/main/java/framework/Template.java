@@ -77,7 +77,7 @@ public class Template {
 		String groovySourceFile = "target/generated/" + template + ".groovy";
 		File file = new File("target/classes/" + template + ".html");
 		if (!file.exists()) {
-			throw new IOException("Template " + template + " does not exist");
+			throw new FileNotFoundException("Template " + template + ".html does not exist");
 		}
 		
 		final String name = file.getName();
@@ -104,6 +104,8 @@ public class Template {
 		writer.append("import static framework.GlobalHelpers.*\n");
 		writer.append("import static view.Helpers.*\n");
 		writer.append("import entities.*\n");
+		writer.append("import java.io.*\n");
+		writer.append("import java.util.*\n");
 		writer.append("framework.ThreadData data = framework.FrontController.threadData.get()\n");
 		FileReader reader = new FileReader(file);
 		try {
@@ -122,13 +124,14 @@ public class Template {
 					addChar(writer, s, ch);
 				} else if (ch == '=' && s == 2) {
 					s = 3;
-					writer.append("data.out.write \"\" +");
+					writer.append("data.out.write \"\" + (");
 				} else if (s == 2) {
 					s = 6;
 					addChar(writer, s, ch);
 				} else if (ch == '%' && s == 6) {
 					s = 4;
 				} else if (ch == '%' && s == 3) {
+					writer.append(")");
 					s = 5;
 				} else if (ch == '>' && s == 4) {
 					s = 0;
@@ -155,13 +158,17 @@ public class Template {
 	} 
 
 	private static void addChar(Writer writer, int s, int ch) throws IOException {
-		if ((ch == '\r' || ch == '\n')) {
+		if (ch == '\n') {
 			if (s == 0) {
 				writer.write("\\n");
 			} else {
 				writer.write(" ");
 			}
-		} else if (ch == '"' && s != 3) {
+		} else if (ch =='\r' ) { 
+			if (s != 0) {
+				writer.write(" ");
+			}
+		} else if (ch == '"' && s != 3 && s != 6) {
 			writer.append("\\\"");
 		} else if (ch == '$') {
 			writer.append("\\$");

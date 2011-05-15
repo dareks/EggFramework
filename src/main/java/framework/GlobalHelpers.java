@@ -24,7 +24,11 @@ import java.lang.reflect.Field;
 import java.lang.reflect.Method;
 import java.math.BigDecimal;
 import java.net.URLEncoder;
+import java.util.Arrays;
+import java.util.Collection;
+import java.util.Comparator;
 import java.util.HashMap;
+import java.util.List;
 import java.util.Map;
 import java.util.Map.Entry;
 import java.util.Set;
@@ -34,7 +38,11 @@ import javax.servlet.http.Cookie;
 import org.apache.commons.beanutils.BeanUtils;
 import org.codehaus.jackson.map.ObjectMapper;
 
+import com.google.code.morphia.utils.ReflectionUtils;
+import com.google.common.collect.Iterables;
+import com.google.common.collect.Lists;
 import com.google.common.collect.Maps;
+import com.google.common.collect.Ordering;
 
 import framework.validation.ActionValidationConfig;
 import framework.validation.DecimalNumberValidator;
@@ -60,10 +68,22 @@ public class GlobalHelpers {
 		StringBuilder builder = new StringBuilder("?");
 		try {
 			for (Entry<String, Object> entry : params.entrySet()) {
-				builder.append(URLEncoder.encode(entry.getKey(), "iso-8859-1"));
-				builder.append("=");
-				builder.append(URLEncoder.encode(String.valueOf(entry.getValue()), "iso-8859-1"));
-				builder.append("&");
+				if (entry.getValue() instanceof Object[]) {
+					Object[] array = (Object[]) entry.getValue();
+					for (Object object : array) {
+						builder.append(URLEncoder.encode(entry.getKey(), "iso-8859-1"));
+						builder.append("=");
+						String value = String.valueOf(object);
+						builder.append(URLEncoder.encode(value, "iso-8859-1"));
+						builder.append("&");
+					}
+				} else {
+					builder.append(URLEncoder.encode(entry.getKey(), "iso-8859-1"));
+					builder.append("=");
+					String value = String.valueOf(entry.getValue());
+					builder.append(URLEncoder.encode(value, "iso-8859-1"));
+					builder.append("&");
+				}
 			}
 			return builder.toString();
 		} catch (Exception e) {
@@ -73,14 +93,18 @@ public class GlobalHelpers {
 	}
 
 	public static String link(String action, String text, Map<String, Object> params) {
-		return String.format("<a href='%s%s/%s.html%s'>%s</a>", config("app.url"), req().getController(), action, generateQueryString(params), text);
+		return link(req().getController(), action, text, params);
 	}
 
 	/**
 	 * Generates link (&lt;a href...&gt;)
 	 */
 	public static String link(String controller, String action, String text) {
-		return String.format("<a href='%s%s/%s.html'>%s</a>", config("app.url"), controller, action, text);
+		return link(controller, action, text, new HashMap<String, Object>());
+	}
+	
+	public static String link(String controller, String action, String text,  Map<String, Object> params) {
+		return String.format("<a href='%s%s/%s.html%s'>%s</a>", config("app.url"), controller, action, generateQueryString(params), text);
 	}
 	
 	public static String action(String action) {
@@ -89,6 +113,10 @@ public class GlobalHelpers {
 	
 	public static String action(String controller, String action) {
 		return String.format("%s%s/%s.html", config("app.url"), controller, action);
+	}
+	
+	public static String action(String controller, String action,  Map<String, Object> params) {
+		return String.format("%s%s/%s.html%s", config("app.url"), controller, action, generateQueryString(params));
 	}
 	
 	public static String resource(String name) {
@@ -181,7 +209,7 @@ public class GlobalHelpers {
 	}
 
 	public static <T> T attr(String key) {
-		return (T) req().get(key);
+		return req().get(key);
 	}
 
 	public static Flash flash(String key, Object value) {
@@ -224,8 +252,24 @@ public class GlobalHelpers {
 		return Long.valueOf(param(name));
 	}
 
+	public static long paramAsLong(String name, long defaultValue) {
+		try {	
+			return paramAsLong(name);
+		} catch (NumberFormatException e) {
+			return defaultValue;
+		}
+	}
+	
 	public static int paramAsInt(String name) {
 		return Integer.valueOf(param(name));
+	}
+	
+	public static int paramAsInt(String name, int defaultValue) {
+		try {
+			return paramAsInt(name);
+		} catch (NumberFormatException e) {
+			return defaultValue;
+		}
 	}
 
 	// TODO WHAT ABOUT NESTED PROPERTIES?
@@ -357,8 +401,7 @@ public class GlobalHelpers {
 
 	// REFLECTION METHODS
 
-	// TODO PONIZSZE 2 METODY POWINNY SPRAWDZAC NAJPIERW CZY JEST GETTER/SETTER
-	// A DOPIERO POZNIEJ SZUKAC POLA!
+	// TODO Following two methods should check first if there is a getter/setter (before accessing the field)
 	public static Object getValueOfFieldOrProperty(Object object, String name) {
 		Field field;
 		try {
@@ -377,7 +420,7 @@ public class GlobalHelpers {
 	public static void setValueOfFieldOrProperty(Object object, String name, Object value) {
 		Field field;
 		try {
-			field = object.getClass().getDeclaredField(name);
+			field = findInheritedField(object.getClass(), name);
 			if (field != null) {
 				field.setAccessible(true);
 				Class<?> type = field.getType();
@@ -406,7 +449,7 @@ public class GlobalHelpers {
 				BeanUtils.setProperty(object, name, value);
 			}
 		} catch (Exception e) {
-			throw new RuntimeException(f("Problem when setting property/field named %s from object %s", name, object), e);
+			// do nth, just skip not existing field (maybe log sth?)
 		}
 	}
 
@@ -481,16 +524,17 @@ public class GlobalHelpers {
 	// end of closure functions
 
 	public static Map<String, Object> map(Object... keyValuePairs) {
-		Map<String, Object> map = Maps.newHashMap();
 		if (keyValuePairs != null) {
 			if (keyValuePairs.length % 2 != 0) {
 				throw new RuntimeException("The number of parameters given to map function need to be even");
 			}
+			Map<String, Object> map = new HashMap<String, Object>(keyValuePairs.length / 2);
 			for (int t = 0; t < keyValuePairs.length; t += 2) {
 				map.put(String.valueOf(keyValuePairs[t]), keyValuePairs[t + 1]);
 			}
+			return map;
 		}
-		return map;
+		return new HashMap<String, Object>(0);
 	}
 
 	public static void vardump() throws IOException {
@@ -499,7 +543,7 @@ public class GlobalHelpers {
 			out().append("<b>").append(entry.getKey()).append("</b>").append(" = ").append(String.valueOf(entry.getValue())).append("<br />");
 		}
 	}
-
+	
 	public static String capitalize(Object o) {
 		String str = String.valueOf(o);
 		return str.substring(0, 1).toUpperCase() + str.substring(1);
@@ -536,6 +580,55 @@ public class GlobalHelpers {
 			result += integer;
 		}
 		return result;
+	}
+	
+	public static <T> Map<T, List<T>> group(Collection<T> collection) {
+		// TODO OPTIMIZE
+		Map<T, List<T>> map = Maps.newHashMap();
+		for (T obj : collection) {
+			if (!map.containsKey(obj)) {
+				map.put(obj, Lists.newArrayList(obj));
+			} else {
+				map.get(obj).add(obj);
+			}
+		}
+		return map;
+	}
+	
+	public static <T> T get(Map<?, T> map, Object key, T defaultValue) {
+		T val = map.get(key);
+		return val == null ? defaultValue : val;
+	}
+	
+	public static <K, V> Map<K, V> put(Map<K, V> map, K key, V value) {
+		if (map != null) {
+			map.put(key, value);
+		}
+		return map;
+	}
+	
+	/** 
+	 * VERY EXPERIMENTAL FEATURE. Generate piece of code depdening on passed object.
+	 * It can generate ready to use HTML code for tables, forms, combo boxes etc.
+	 */
+	public static void scaffold(String name, Object o) throws IOException, IllegalArgumentException, IllegalAccessException {
+		Writer out = out();
+
+		String type = null;
+		Field[] fields = null;
+		if (o instanceof Iterable) {
+			Iterable iterable = (Iterable) o;
+			Object first = Iterables.getFirst(iterable, null);
+			fields = ReflectionUtils.getDeclaredAndInheritedFields(first.getClass(), true);
+			type = "table";
+		} else if (o instanceof Class) {
+			fields = ReflectionUtils.getDeclaredAndInheritedFields((Class) o, true);
+			type = "form";
+		} else {
+			fields = ReflectionUtils.getDeclaredAndInheritedFields(o.getClass(), true);
+			type = "view";
+		}
+		out.append(parse("/_scaffold", map("type", type, "name", name, "fields", fields, "object", o)));
 	}
 	
 }

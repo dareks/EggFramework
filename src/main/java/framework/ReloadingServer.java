@@ -30,6 +30,9 @@ import org.apache.commons.jci.stores.FileResourceStore;
  * Run this class in order to run a web server with you application. Remember to specify java.library.path JVM 
  * option pointing to libs directory (-Djava.library.path=libs). 
  * 
+ * EXPERIMENTAL. Use with caution cause it generates PermGen exceptions on SunJVM and OutOfMemoryException in JRockit (memory leaks). 
+ * At this moment a better approach is to use Server class instead and JRebel tool for automatic reloading.
+ * 
  * TODO Server does not need to be stopped every time class file change. This class should check also if application
  * was started already. If it wasn't then do nothing
  * 
