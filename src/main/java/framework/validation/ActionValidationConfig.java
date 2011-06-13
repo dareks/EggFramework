@@ -46,7 +46,7 @@ public class ActionValidationConfig {
 		return config.get(path);
 	}
 
-	// TODO SKOPIOWANTY KOD Z OBJECTVALIDATIONCONFIG!
+	// TODO DUPLICATE CODE - COPIED FROM OBJECTVALIDATIONCONFIG!
 	public void validate(Params params, Errors errors) {
 		Map<String, Object> mapToValidate = Maps.newHashMap();
 		Map<String, String[]> map = params().getMap();

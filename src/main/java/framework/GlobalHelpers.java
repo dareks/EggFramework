@@ -26,23 +26,23 @@ import java.math.BigDecimal;
 import java.net.URLEncoder;
 import java.util.Arrays;
 import java.util.Collection;
-import java.util.Comparator;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 import java.util.Map.Entry;
 import java.util.Set;
 
+import javax.servlet.AsyncContext;
 import javax.servlet.http.Cookie;
 
 import org.apache.commons.beanutils.BeanUtils;
+import org.codehaus.groovy.runtime.ArrayUtil;
 import org.codehaus.jackson.map.ObjectMapper;
 
 import com.google.code.morphia.utils.ReflectionUtils;
 import com.google.common.collect.Iterables;
 import com.google.common.collect.Lists;
 import com.google.common.collect.Maps;
-import com.google.common.collect.Ordering;
 
 import framework.validation.ActionValidationConfig;
 import framework.validation.DecimalNumberValidator;
@@ -89,6 +89,15 @@ public class GlobalHelpers {
 		} catch (Exception e) {
 			e.printStackTrace();
 			return e.getMessage();
+		}
+	}
+	
+	// TODO Experimental
+	public static String appendParams(String url, Map<String, Object> params) {
+		if (!url.contains("?")) {
+			return url + generateQueryString(params);
+		} else {
+			return url + "&" + generateQueryString(params).substring(1);			
 		}
 	}
 
@@ -252,7 +261,7 @@ public class GlobalHelpers {
 		return Long.valueOf(param(name));
 	}
 
-	public static long paramAsLong(String name, long defaultValue) {
+	public static Long paramAsLong(String name, Long defaultValue) {
 		try {	
 			return paramAsLong(name);
 		} catch (NumberFormatException e) {
@@ -264,7 +273,7 @@ public class GlobalHelpers {
 		return Integer.valueOf(param(name));
 	}
 	
-	public static int paramAsInt(String name, int defaultValue) {
+	public static Integer paramAsInt(String name, Integer defaultValue) {
 		try {
 			return paramAsInt(name);
 		} catch (NumberFormatException e) {
@@ -396,7 +405,33 @@ public class GlobalHelpers {
 			}
 		}
 	};
+	
+	public static final <T> EnumValidator<T> enumValidator(T... values) {
+		return new EnumValidator<T>(values);
+	}
+	
+	public static class EnumValidator<T> implements Validator {
 
+		private T[] values;
+
+		public EnumValidator(T... values) {
+			this.values = values;
+		}
+		
+		public void validates(String field, Object value, Errors errors) {
+			if (value != null) {
+				for (Object val : values) {
+					if (value.equals(String.valueOf(val))) {
+						return;
+					}
+				}
+				errors.add(field, field + " is not one of: " + values);
+			}
+			
+		}
+		
+	}
+	
 	// end of validation
 
 	// REFLECTION METHODS
@@ -629,6 +664,20 @@ public class GlobalHelpers {
 			type = "view";
 		}
 		out.append(parse("/_scaffold", map("type", type, "name", name, "fields", fields, "object", o)));
+	}
+	
+	public static AsyncForward asyncForward() {
+		AsyncContext ctx = req().startAsync();
+		ctx.setTimeout(30000);
+		AsyncForward forward = new AsyncForward(ctx);
+		forward.action = "/" + req().getController() + "/" + req().getAction() + "Async.html";
+		return forward;
+	}
+	
+	public static Object[] join(Object[] array, Object o) {
+		Object[] result = Arrays.copyOf(array, array.length + 1, Object[].class);
+		result[array.length] = (Object) o;
+		return result;
 	}
 	
 }

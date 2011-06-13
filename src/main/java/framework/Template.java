@@ -131,14 +131,13 @@ public class Template {
 				} else if (ch == '%' && s == 6) {
 					s = 4;
 				} else if (ch == '%' && s == 3) {
-					writer.append(")");
 					s = 5;
 				} else if (ch == '>' && s == 4) {
 					s = 0;
-					writer.append(";\ndata.out.write \"");
+					writer.append("\ndata.out.write \"");
 				} else if (ch == '>' && s == 5) {
 					s = 0;
-					writer.append("\ndata.out.write \"");
+					writer.append(")\ndata.out.write \"");
 				} else if (s == 4) {
 					s = 2;
 					writer.append('%');

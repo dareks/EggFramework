@@ -36,7 +36,6 @@ public class ThreadData {
 		request = new Request(req, controller, action);
 		cookies.request = req;
 		cookies.response = resp;
-		flash.request = req;
 		session.request = req;
 		this.resp = resp;
 	}

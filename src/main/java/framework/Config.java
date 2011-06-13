@@ -59,14 +59,18 @@ public class Config {
 	}
 
 	public static String get(String key) {
-		checkModifications();
-		return String.valueOf(properties.get(key));
+		return get(key, "");
 	}
 
 	public static String get(String key, String defaultValue) {
 		checkModifications();
 		Object value = properties.get(key);
-		return value != null ? String.valueOf(value) : defaultValue;
+		return value != null ? processPlaceholders(String.valueOf(value)) : defaultValue;
+	}
+
+	private static String processPlaceholders(String str) {
+		// TODO IMPLEMENT
+		return str;
 	}
 
 	public static boolean isTrue(String key) {

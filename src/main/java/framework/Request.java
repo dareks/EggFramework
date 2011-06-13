@@ -21,6 +21,7 @@ import java.util.Enumeration;
 import java.util.Map;
 import java.util.Map.Entry;
 
+import javax.servlet.AsyncContext;
 import javax.servlet.http.HttpServletRequest;
 
 import com.google.common.collect.Maps;
@@ -35,6 +36,10 @@ public class Request {
 		this.request = request;
 		this.controller = controller;
 		this.action = action;
+	}
+	
+	AsyncContext startAsync() {
+		return request.startAsync();
 	}
 	
 	public InputStream getInputStream() throws IOException {

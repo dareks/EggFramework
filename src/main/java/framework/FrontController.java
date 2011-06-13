@@ -24,6 +24,7 @@ import java.io.Writer;
 import java.util.ArrayList;
 import java.util.Map;
 
+import javax.servlet.AsyncContext;
 import javax.servlet.ServletContext;
 import javax.servlet.ServletException;
 import javax.servlet.http.HttpServletRequest;
@@ -55,7 +56,7 @@ public class FrontController {
 			data.request.set("errors", errors);
 			data.request.set("params", data.params);
 			data.request.set("messages", new ArrayList<String>());
-			data.request.set("flash", data.flash.pop());
+			data.flash.loadFromSession(req);
 			data.request.set("session", data.session);
 			initClass(path);
 			Response response = runBefore(path, data);
@@ -71,22 +72,28 @@ public class FrontController {
 				}
 				response = runAction(path, data);
 				if (response != null) {
+					if (response instanceof AsyncForward) {
+						return;
+					}
 					if (response.action != null) {
 						req.getRequestDispatcher(response.action).forward(req, res);
 						return;
 					}
 					if (response.redirect != null) {
-						res.sendRedirect(response.redirect);
+						sendRedirect(res, data, response);
 						return;
 					}
 				}
 			} else {
+				if (response instanceof AsyncForward) {
+					return;
+				}
 				if (response.action != null) {
 					req.getRequestDispatcher(response.action).forward(req, res);
 					return;
 				}
 				if (response.redirect != null) {
-					res.sendRedirect(response.redirect);
+					sendRedirect(res, data, response);
 					return;
 				}
 			}
@@ -115,7 +122,16 @@ public class FrontController {
 			e.printStackTrace();
 			throw e;
 		} finally {
+			data.flash.saveToSession(req);
 			threadData.remove();
+		}
+	}
+
+	private void sendRedirect(HttpServletResponse res, ThreadData data, Response response) throws IOException {
+		if (data.flash.hasCurrentAttributes()) {
+			res.sendRedirect(appendParams(response.redirect, map(Flash.FLASHID_PARAM, data.flash.flashId)));
+		} else {
+			res.sendRedirect(response.redirect);
 		}
 	}
 	
