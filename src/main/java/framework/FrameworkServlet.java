@@ -37,9 +37,8 @@ public class FrameworkServlet extends HttpServlet {
         Class<?> appClass = Thread.currentThread().getContextClassLoader().loadClass("services.Application");
         application = appClass.newInstance();
         application.getClass().getMethod("start").invoke(application);
-        if (!ROUTING.hasAnyRules()) {
-            ROUTING.addRule(new Rule("/$controller/$action"));
-        }
+        ROUTING.addRule(new Rule("/$controller/$action/$id"));
+        ROUTING.addRule(new Rule("/$controller/$action"));
         ROUTING.close();
         started = true;
     }
