@@ -27,83 +27,82 @@ import flex.messaging.io.amf.MessageBody;
  */
 public class AMFGateway extends HttpServlet {
 
-	private static final long serialVersionUID = 1L;
+    private static final long serialVersionUID = 1L;
 
-	@Override
-	protected void service(HttpServletRequest req, HttpServletResponse resp)
-			throws ServletException, IOException {
-		Java15AmfMessageSerializer serializer = new Java15AmfMessageSerializer();
-		try {
-			SerializationContext ctx = getSerializationContext();
-			AmfMessageDeserializer deserializer = new AmfMessageDeserializer();
-			InputStream is = req.getInputStream();
-			boolean traceEnabled = Config.isTrue("amfGateway.trace");
-			AmfTrace inTrace = traceEnabled ? new AmfTrace() : null;
-			deserializer.initialize(ctx, is, inTrace);
+    @Override
+    protected void service(HttpServletRequest req, HttpServletResponse resp) throws ServletException, IOException {
+        Java15AmfMessageSerializer serializer = new Java15AmfMessageSerializer();
+        try {
+            SerializationContext ctx = getSerializationContext();
+            AmfMessageDeserializer deserializer = new AmfMessageDeserializer();
+            InputStream is = req.getInputStream();
+            boolean traceEnabled = Config.isTrue("amfGateway.trace");
+            AmfTrace inTrace = traceEnabled ? new AmfTrace() : null;
+            deserializer.initialize(ctx, is, inTrace);
 
-			ActionMessage inputMessage = new ActionMessage();
-			ActionContext actionContext = new ActionContext();
-			deserializer.readMessage(inputMessage, actionContext);
-			if (traceEnabled) {
-				System.out.println(inTrace);
-			}
-			
-			AmfTrace outTrace = traceEnabled ? new AmfTrace() : null;
-			ActionMessage outputMessage = new ActionMessage();
-			List<MessageBody> bodies = inputMessage.getBodies();
-			for (MessageBody body : bodies) {
-				String targetURI = body.getTargetURI();
-				String responseURI = body.getResponseURI();
-				req.setAttribute(ACTION_URI, targetURI);
-				req.setAttribute(ACTION_DATA, body.getData());
-	
-				resp.setContentType("application/x-amf");
-	
-				serializer.initialize(ctx, resp.getOutputStream(), outTrace);
-	
-				// include to FrontController
-				req.getRequestDispatcher(targetURI + ".html").include(req, resp);
-				Object object = req.getAttribute(ACTION_RETURNED_OBJECT);
-	
-				outputMessage.addBody(new MessageBody(responseURI + "/onResult", targetURI, object));
-				resp.getOutputStream().flush();
-			}
-			serializer.writeMessage(outputMessage);
-			if (traceEnabled) {
-				System.out.println(outTrace);
-			}
-		} catch (ClassNotFoundException e) {
-			resp.sendError(400, e.getMessage());
-			e.printStackTrace();
-		}
-		resp.getOutputStream().flush();
-	}
+            ActionMessage inputMessage = new ActionMessage();
+            ActionContext actionContext = new ActionContext();
+            deserializer.readMessage(inputMessage, actionContext);
+            if (traceEnabled) {
+                System.out.println(inTrace);
+            }
 
-	private static SerializationContext getSerializationContext() {
-		SerializationContext serializationContext = new SerializationContext();
-		serializationContext.enableSmallMessages = true;
-		serializationContext.instantiateTypes = true;
-		// use _remoteClass field
-		serializationContext.supportRemoteClass = true;
-		// false Legacy Flex 1.5 behavior was to return a java.util.Collection
-		// for Array
-		// ture New Flex 2+ behavior is to return Object[] for AS3 Array
-		serializationContext.legacyCollection = false;
+            AmfTrace outTrace = traceEnabled ? new AmfTrace() : null;
+            ActionMessage outputMessage = new ActionMessage();
+            List<MessageBody> bodies = inputMessage.getBodies();
+            for (MessageBody body : bodies) {
+                String targetURI = body.getTargetURI();
+                String responseURI = body.getResponseURI();
+                req.setAttribute(ACTION_URI, targetURI);
+                req.setAttribute(ACTION_DATA, body.getData());
 
-		serializationContext.legacyMap = false;
-		// false Legacy flash.xml.XMLDocument Type
-		// true New E4X XML Type
-		serializationContext.legacyXMLDocument = false;
+                resp.setContentType("application/x-amf");
 
-		// determines whether the constructed Document is name-space aware
-		serializationContext.legacyXMLNamespaces = false;
-		serializationContext.legacyThrowable = false;
-		serializationContext.legacyBigNumbers = false;
+                serializer.initialize(ctx, resp.getOutputStream(), outTrace);
 
-		serializationContext.restoreReferences = false;
-		serializationContext.logPropertyErrors = false;
-		serializationContext.ignorePropertyErrors = true;
-		return serializationContext;
-	}
+                // include to FrontController
+                req.getRequestDispatcher(targetURI + ".html").include(req, resp);
+                Object object = req.getAttribute(ACTION_RETURNED_OBJECT);
+
+                outputMessage.addBody(new MessageBody(responseURI + "/onResult", targetURI, object));
+                resp.getOutputStream().flush();
+            }
+            serializer.writeMessage(outputMessage);
+            if (traceEnabled) {
+                System.out.println(outTrace);
+            }
+        } catch (ClassNotFoundException e) {
+            resp.sendError(400, e.getMessage());
+            e.printStackTrace();
+        }
+        resp.getOutputStream().flush();
+    }
+
+    private static SerializationContext getSerializationContext() {
+        SerializationContext serializationContext = new SerializationContext();
+        serializationContext.enableSmallMessages = true;
+        serializationContext.instantiateTypes = true;
+        // use _remoteClass field
+        serializationContext.supportRemoteClass = true;
+        // false Legacy Flex 1.5 behavior was to return a java.util.Collection
+        // for Array
+        // ture New Flex 2+ behavior is to return Object[] for AS3 Array
+        serializationContext.legacyCollection = false;
+
+        serializationContext.legacyMap = false;
+        // false Legacy flash.xml.XMLDocument Type
+        // true New E4X XML Type
+        serializationContext.legacyXMLDocument = false;
+
+        // determines whether the constructed Document is name-space aware
+        serializationContext.legacyXMLNamespaces = false;
+        serializationContext.legacyThrowable = false;
+        serializationContext.legacyBigNumbers = false;
+
+        serializationContext.restoreReferences = false;
+        serializationContext.logPropertyErrors = false;
+        serializationContext.ignorePropertyErrors = true;
+        return serializationContext;
+    }
 
 }

@@ -1,0 +1,4 @@
+* Use Eclipse IDE
+* Use eclipse-formatter.xml provided
+* Configure number of STATIC imports needed for .* to "1" in Window/Preferences/Java/Code style/Organize Imports
+* Configure Eclipse to force format source code and organize imports on every save - Window/Preferences/Java/Editor/Save actions

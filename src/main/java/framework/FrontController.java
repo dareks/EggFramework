@@ -24,7 +24,6 @@ import java.io.Writer;
 import java.util.ArrayList;
 import java.util.Map;
 
-import javax.servlet.AsyncContext;
 import javax.servlet.ServletContext;
 import javax.servlet.ServletException;
 import javax.servlet.http.HttpServletRequest;
@@ -35,183 +34,186 @@ import framework.validation.Errors;
 
 public class FrontController {
 
-	private static final long serialVersionUID = 1L;
-	// TODO MOVE THIS TO SOME OTHER PLACE WHICH IS NOT DEPENDENT ON SERVLETS
-	public static final ThreadLocal<ThreadData> threadData = new ThreadLocal<ThreadData>();
+    private static final long serialVersionUID = 1L;
+    // TODO MOVE THIS TO SOME OTHER PLACE WHICH IS NOT DEPENDENT ON SERVLETS
+    public static final ThreadLocal<ThreadData> threadData = new ThreadLocal<ThreadData>();
 
-	public void service(HttpServletRequest req, HttpServletResponse res, ServletContext ctx) throws ServletException, IOException {
-		res.setCharacterEncoding("utf-8");
-		String path = (String) (req.getAttribute(ACTION_URI) != null ? req.getAttribute(ACTION_URI) : req.getServletPath().substring(0, req.getServletPath().indexOf('.')));
+    public void service(HttpServletRequest req, HttpServletResponse res, ServletContext ctx, Routing routing) throws ServletException, IOException {
+        res.setCharacterEncoding("utf-8");
+        String path = (String) req.getAttribute(ACTION_URI);
+        if (path == null) {
+            String servletPath = req.getServletPath();
+            if (servletPath.indexOf('.') > -1) {
+                path = servletPath.substring(0, servletPath.indexOf('.'));
+            } else {
+                path = servletPath;
+            }
+        }
 
-		final String controller = getController(path);
-		final String action = getAction(path);
-		ThreadData data = new ThreadData(req, res, controller, action);
-		threadData.set(data);
-		
-		try {
-			Errors errors = data.request.get("errors");
-			if (errors == null) {
-				errors = new Errors();
-			}
-			data.request.set("errors", errors);
-			data.request.set("params", data.params);
-			data.request.set("messages", new ArrayList<String>());
-			data.flash.loadFromSession(req);
-			data.request.set("session", data.session);
-			initClass(path);
-			Response response = runBefore(path, data);
-			if (response == null) {
-				if (!errors.hasErrors()) { 
-					ActionValidationConfig validationsConfig = ActionValidationConfig.get(path);
-					validationsConfig.validate(data.params, errors);
-					if (errors.hasErrors()) {
-						path = validationsConfig.getInputPath(); 
-						req.getRequestDispatcher(path + ".html").forward(req, res);
-						return;
-					}
-				}
-				response = runAction(path, data);
-				if (response != null) {
-					if (response instanceof AsyncForward) {
-						return;
-					}
-					if (response.action != null) {
-						req.getRequestDispatcher(response.action).forward(req, res);
-						return;
-					}
-					if (response.redirect != null) {
-						sendRedirect(res, data, response);
-						return;
-					}
-				}
-			} else {
-				if (response instanceof AsyncForward) {
-					return;
-				}
-				if (response.action != null) {
-					req.getRequestDispatcher(response.action).forward(req, res);
-					return;
-				}
-				if (response.redirect != null) {
-					sendRedirect(res, data, response);
-					return;
-				}
-			}
-			if (response != null) {
-				res.setContentType(response.contentType);
-			}
-			boolean servletIncluded = req.getAttribute(ACTION_URI) != null;
-			if (!servletIncluded && (response == null || response.template != null)) {
-				Map<String, Object> model = data.request.getAttributes();
-				String template = response != null ? response.template : path;
-				renderTemplate(res.getWriter(), model, template, response);
-			} else if (response != null && response.text != null) {
-				res.getWriter().print(response.text);
-			} else if (response != null && response.bytes != null) {
-				res.getOutputStream().write(response.bytes);
-				res.getOutputStream().flush();
-			} else if (servletIncluded) {
-				req.setAttribute(ACTION_RETURNED_OBJECT, response != null ? response.singleObject : null);
-			}
-		} catch (FileNotFoundException e) {
-			res.sendError(404, e.getMessage());
-		} catch (IOException e) {
-			e.printStackTrace();
-			throw e;
-		} catch (ServletException e) {
-			e.printStackTrace();
-			throw e;
-		} finally {
-			data.flash.saveToSession(req);
-			threadData.remove();
-		}
-	}
+        Request request = routing.route(path, req);
+        if (request == null) {
+            res.sendError(404);
+            return;
+        }
+        req = request.getRequest();
+        ThreadData data = new ThreadData(request, res);
+        threadData.set(data);
 
-	private void sendRedirect(HttpServletResponse res, ThreadData data, Response response) throws IOException {
-		if (data.flash.hasCurrentAttributes()) {
-			res.sendRedirect(appendParams(response.redirect, map(Flash.FLASHID_PARAM, data.flash.flashId)));
-		} else {
-			res.sendRedirect(response.redirect);
-		}
-	}
-	
-	/**
-	 * Initializes controller class - static block will be executed
-	 */
-	private void initClass(String path) throws ServletException {
-		String classForPath = classForPath(path);
-		try {
-			Class.forName(classForPath, true, Thread.currentThread().getContextClassLoader());
-		} catch (ClassNotFoundException e) {
-			// No need to have a controller class
-		}		
-	}
-	
-	private String getController(String path) throws ServletException {
-		return path.substring(1, path.lastIndexOf('/'));
-	}
+        try {
+            Errors errors = data.request.get("errors");
+            if (errors == null) {
+                errors = new Errors();
+            }
+            data.request.set("errors", errors);
+            data.request.set("params", data.params);
+            data.request.set("messages", new ArrayList<String>());
+            data.flash.loadFromSession(req);
+            data.request.set("session", data.session);
+            initClass(request.getController());
+            Response response = runBefore(request.getController(), data);
+            if (response == null) {
+                if (!errors.hasErrors()) {
+                    ActionValidationConfig validationsConfig = ActionValidationConfig.get(request.getPath()); // TODO
+                    validationsConfig.validate(data.params, errors);
+                    if (errors.hasErrors()) {
+                        path = validationsConfig.getInputPath();
+                        req.getRequestDispatcher(path + ".html").forward(req, res);
+                        return;
+                    }
+                }
+                response = runAction(request, data);
+                if (response != null) {
+                    if (response instanceof AsyncForward) {
+                        return;
+                    }
+                    if (response.action != null) {
+                        req.getRequestDispatcher(response.action).forward(req, res);
+                        return;
+                    }
+                    if (response.redirect != null) {
+                        sendRedirect(res, data, response);
+                        return;
+                    }
+                }
+            } else {
+                if (response instanceof AsyncForward) {
+                    return;
+                }
+                if (response.action != null) {
+                    req.getRequestDispatcher(response.action).forward(req, res);
+                    return;
+                }
+                if (response.redirect != null) {
+                    sendRedirect(res, data, response);
+                    return;
+                }
+            }
+            if (response != null) {
+                res.setContentType(response.contentType);
+            }
+            boolean servletIncluded = req.getAttribute(ACTION_URI) != null;
+            if (!servletIncluded && (response == null || response.template != null)) {
+                Map<String, Object> model = data.request.getAttributes();
+                String template = response != null ? response.template : request.getPath();
+                renderTemplate(res.getWriter(), model, template, response);
+            } else if (response != null && response.text != null) {
+                res.getWriter().print(response.text);
+            } else if (response != null && response.bytes != null) {
+                res.getOutputStream().write(response.bytes);
+                res.getOutputStream().flush();
+            } else if (servletIncluded) {
+                req.setAttribute(ACTION_RETURNED_OBJECT, response != null ? response.singleObject : null);
+            }
+        } catch (FileNotFoundException e) {
+            res.sendError(404, e.getMessage());
+        } catch (IOException e) {
+            e.printStackTrace();
+            throw e;
+        } catch (ServletException e) {
+            e.printStackTrace();
+            throw e;
+        } finally {
+            data.flash.saveToSession(req);
+            threadData.remove();
+        }
+    }
 
-	private String getAction(String path) {
-		return path.substring(path.lastIndexOf('/') + 1);
-	}
-	
-	private String classForPath(String path) {
-		String className = path.substring(1, path.lastIndexOf('/'));
-		return "controllers." + className.substring(0, 1).toUpperCase() + className.substring(1) + "Controller";
-	}
+    private void sendRedirect(HttpServletResponse res, ThreadData data, Response response) throws IOException {
+        if (data.flash.hasCurrentAttributes()) {
+            res.sendRedirect(appendParams(response.redirect, map(Flash.FLASHID_PARAM, data.flash.flashId)));
+        } else {
+            res.sendRedirect(response.redirect);
+        }
+    }
 
-	private Response runBefore(String path, ThreadData data) throws ServletException {
-		try {
-			Action before = findAction(classForPath(path), "before");
-			if (before != null) {
-				return before.execute(data);
-			}
-			return null;
-		} catch (Exception e) {
-			Throwable cause = e.getCause();
-			throw new ServletException("Problem executing the action " + path, cause);
-		}
-	}
+    /**
+     * Initializes controller class - static block will be executed
+     */
+    private void initClass(String controller) throws ServletException {
+        String clazz = classForController(controller);
+        try {
+            Class.forName(clazz, true, Thread.currentThread().getContextClassLoader());
+        } catch (ClassNotFoundException e) {
+            // No need to have a controller class
+        }
+    }
 
-	private Response runAction(String path, ThreadData data) throws ServletException {
-		try {
-			Action action = findAction(classForPath(path), getAction(path));
-			if (action != null) {
-				return action.execute(data);
-			}
-			return null;
-		} catch (Exception e) {
-//			Throwable cause = e.getCause();
-			throw new ServletException("Problem executing the action " + path, e);
-		}
-	}
+    private String classForController(String controller) {
+        return "controllers." + controller.substring(0, 1).toUpperCase() + controller.substring(1) + "Controller";
+    }
 
-	private void renderTemplate(Writer out, Map<String, Object> model, String path, Response response) throws ServletException, FileNotFoundException {
-		try {
-			StringWriter writer = new StringWriter();
-			threadData.get().setOut(writer);
-			Template.render(path, model, writer);
-			model.put("content", writer.toString());
-			threadData.get().setOut(out);
-			String layoutTemplate1 = "/" + getController(path) + "/layout";
-			String layoutTemplate2 = "/layout";
-			String layoutTemplate = null;
-			if (Template.exists(layoutTemplate1)) {
-				layoutTemplate = layoutTemplate1;
-			} else if (Template.exists(layoutTemplate2)) {
-				layoutTemplate = layoutTemplate2;
-			}
-			boolean isPartial = (response != null && response.partial) || path.substring(path.lastIndexOf('/') + 1).charAt(0) == '_';
-			if (layoutTemplate != null && !isPartial) {
-				Template.render(layoutTemplate, model, out);
-			} else {
-				out.write(writer.toString());
-			}
-		} catch (FileNotFoundException e) {
-			throw e;
-		} catch (Exception e) {
-			throw new ServletException("Problem rendering the page " + path, e);
-		}
-	}
+    private Response runBefore(String controller, ThreadData data) throws ServletException {
+        try {
+            Action before = findAction(classForController(controller), "before");
+            if (before != null) {
+                return before.execute(data);
+            }
+            return null;
+        } catch (Exception e) {
+            Throwable cause = e.getCause();
+            throw new ServletException("Problem executing before in controller " + controller, cause);
+        }
+    }
+
+    private Response runAction(Request req, ThreadData data) throws ServletException {
+        try {
+            Action action = findAction(classForController(req.getController()), req.getAction());
+            if (action != null) {
+                return action.execute(data);
+            }
+            return null;
+        } catch (Exception e) {
+            // Throwable cause = e.getCause();
+            throw new ServletException("Problem executing the action " + req.getAction(), e);
+        }
+    }
+
+    private void renderTemplate(Writer out, Map<String, Object> model, String path, Response response) throws ServletException, FileNotFoundException {
+        try {
+            StringWriter writer = new StringWriter();
+            threadData.get().setOut(writer);
+            Template.render(path, model, writer);
+            model.put("content", writer.toString());
+            threadData.get().setOut(out);
+            String layoutTemplate1 = "/" + path.substring(1, Math.max(1, path.lastIndexOf('/'))) + "/layout";
+            String layoutTemplate2 = "/layout";
+            String layoutTemplate = null;
+            if (Template.exists(layoutTemplate1)) {
+                layoutTemplate = layoutTemplate1;
+            } else if (Template.exists(layoutTemplate2)) {
+                layoutTemplate = layoutTemplate2;
+            }
+            boolean isPartial = (response != null && response.partial) || path.substring(path.lastIndexOf('/') + 1).charAt(0) == '_';
+            if (layoutTemplate != null && !isPartial) {
+                Template.render(layoutTemplate, model, out);
+            } else {
+                out.write(writer.toString());
+            }
+        } catch (FileNotFoundException e) {
+            throw e;
+        } catch (Exception e) {
+            throw new ServletException("Problem rendering the page " + path, e);
+        }
+    }
 
 }

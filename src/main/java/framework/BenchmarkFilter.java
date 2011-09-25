@@ -12,22 +12,21 @@ import javax.servlet.http.HttpServletRequest;
 
 public class BenchmarkFilter implements Filter {
 
-	public void init(FilterConfig filterConfig) throws ServletException {
-	}
+    public void init(FilterConfig filterConfig) throws ServletException {
+    }
 
-	public void doFilter(ServletRequest request, ServletResponse response,
-			FilterChain chain) throws IOException, ServletException {
-		HttpServletRequest req = (HttpServletRequest) request;
-		System.out.printf("\n------------------------------ %15s ------------------------------\n", req.getServletPath());
-		long started = System.currentTimeMillis();
-		try {
-			chain.doFilter(request, response);
-		} finally {
-			System.out.printf("------------------------------ %12d ms ------------------------------ \n", System.currentTimeMillis() - started);
-		}
-	}
+    public void doFilter(ServletRequest request, ServletResponse response, FilterChain chain) throws IOException, ServletException {
+        HttpServletRequest req = (HttpServletRequest) request;
+        System.out.printf("\n------------------------------ %15s ------------------------------\n", req.getServletPath());
+        long started = System.currentTimeMillis();
+        try {
+            chain.doFilter(request, response);
+        } finally {
+            System.out.printf("------------------------------ %12d ms ------------------------------ \n", System.currentTimeMillis() - started);
+        }
+    }
 
-	public void destroy() {
-	}
+    public void destroy() {
+    }
 
 }

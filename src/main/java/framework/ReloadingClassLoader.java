@@ -32,98 +32,98 @@ import org.apache.commons.jci.stores.ResourceStoreClassLoader;
  */
 public class ReloadingClassLoader extends ClassLoader implements ReloadNotificationListener {
 
-//	private final Log log = LogFactory.getLog(ReloadingClassLoader.class);
+    // private final Log log = LogFactory.getLog(ReloadingClassLoader.class);
 
-	private final ClassLoader parent;
-	private ResourceStore[] stores = new ResourceStore[0];
-	private ClassLoader delegate;
+    private final ClassLoader parent;
+    private ResourceStore[] stores = new ResourceStore[0];
+    private ClassLoader delegate;
 
-	public ReloadingClassLoader(final ClassLoader pParent) {
-		super(pParent);
-		parent = pParent;
+    public ReloadingClassLoader(final ClassLoader pParent) {
+        super(pParent);
+        parent = pParent;
 
-		delegate = new ResourceStoreClassLoader(parent, stores);
-	}
+        delegate = new ResourceStoreClassLoader(parent, stores);
+    }
 
-	public boolean addResourceStore(final ResourceStore pStore) {
-		try {
-			final int n = stores.length;
-			final ResourceStore[] newStores = new ResourceStore[n + 1];
-			System.arraycopy(stores, 0, newStores, 1, n);
-			newStores[0] = pStore;
-			stores = newStores;
-			delegate = new ResourceStoreClassLoader(parent, stores);
-			return true;
-		} catch (final Exception e) {
-			e.printStackTrace();
-//			log.error("could not add resource store " + pStore);
-		}
-		return false;
-	}
+    public boolean addResourceStore(final ResourceStore pStore) {
+        try {
+            final int n = stores.length;
+            final ResourceStore[] newStores = new ResourceStore[n + 1];
+            System.arraycopy(stores, 0, newStores, 1, n);
+            newStores[0] = pStore;
+            stores = newStores;
+            delegate = new ResourceStoreClassLoader(parent, stores);
+            return true;
+        } catch (final Exception e) {
+            e.printStackTrace();
+            // log.error("could not add resource store " + pStore);
+        }
+        return false;
+    }
 
-	public boolean removeResourceStore(final ResourceStore pStore) {
+    public boolean removeResourceStore(final ResourceStore pStore) {
 
-		final int n = stores.length;
-		int i = 0;
+        final int n = stores.length;
+        int i = 0;
 
-		// FIXME: this should be improved with a Map
-		// find the pStore and index position with var i
-		while ((i < n) && (stores[i] != pStore)) {
-			i++;
-		}
+        // FIXME: this should be improved with a Map
+        // find the pStore and index position with var i
+        while ((i < n) && (stores[i] != pStore)) {
+            i++;
+        }
 
-		// pStore was not found
-		if (i == n) {
-			return false;
-		}
+        // pStore was not found
+        if (i == n) {
+            return false;
+        }
 
-		// if stores length > 1 then array copy old values, else create new
-		// empty store
-		final ResourceStore[] newStores = new ResourceStore[n - 1];
-		if (i > 0) {
-			System.arraycopy(stores, 0, newStores, 0, i);
-		}
-		if (i < n - 1) {
-			System.arraycopy(stores, i + 1, newStores, i, (n - i - 1));
-		}
+        // if stores length > 1 then array copy old values, else create new
+        // empty store
+        final ResourceStore[] newStores = new ResourceStore[n - 1];
+        if (i > 0) {
+            System.arraycopy(stores, 0, newStores, 0, i);
+        }
+        if (i < n - 1) {
+            System.arraycopy(stores, i + 1, newStores, i, (n - i - 1));
+        }
 
-		stores = newStores;
-		delegate = new ResourceStoreClassLoader(parent, stores);
-		return true;
-	}
+        stores = newStores;
+        delegate = new ResourceStoreClassLoader(parent, stores);
+        return true;
+    }
 
-	public void handleNotification() {
-//		log.debug("reloading");
-		delegate = new ResourceStoreClassLoader(parent, stores);
-	}
+    public void handleNotification() {
+        // log.debug("reloading");
+        delegate = new ResourceStoreClassLoader(parent, stores);
+    }
 
-	public void clearAssertionStatus() {
-		delegate.clearAssertionStatus();
-	}
+    public void clearAssertionStatus() {
+        delegate.clearAssertionStatus();
+    }
 
-	public URL getResource(String name) {
-		return delegate.getResource(name);
-	}
+    public URL getResource(String name) {
+        return delegate.getResource(name);
+    }
 
-	public InputStream getResourceAsStream(String name) {
-		return delegate.getResourceAsStream(name);
-	}
+    public InputStream getResourceAsStream(String name) {
+        return delegate.getResourceAsStream(name);
+    }
 
-	public Class loadClass(String name) throws ClassNotFoundException {
-		System.out.println(name);
-		return delegate.loadClass(name);
-	}
+    public Class loadClass(String name) throws ClassNotFoundException {
+        System.out.println(name);
+        return delegate.loadClass(name);
+    }
 
-	public void setClassAssertionStatus(String className, boolean enabled) {
-		delegate.setClassAssertionStatus(className, enabled);
-	}
+    public void setClassAssertionStatus(String className, boolean enabled) {
+        delegate.setClassAssertionStatus(className, enabled);
+    }
 
-	public void setDefaultAssertionStatus(boolean enabled) {
-		delegate.setDefaultAssertionStatus(enabled);
-	}
+    public void setDefaultAssertionStatus(boolean enabled) {
+        delegate.setDefaultAssertionStatus(enabled);
+    }
 
-	public void setPackageAssertionStatus(String packageName, boolean enabled) {
-		delegate.setPackageAssertionStatus(packageName, enabled);
-	}
+    public void setPackageAssertionStatus(String packageName, boolean enabled) {
+        delegate.setPackageAssertionStatus(packageName, enabled);
+    }
 
 }

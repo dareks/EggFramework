@@ -19,7 +19,6 @@ package framework;
 import org.apache.commons.jci.stores.ResourceStore;
 import org.apache.commons.jci.utils.ConversionUtils;
 
-
 /**
  * A ClassLoader backed by an array of ResourceStores
  * 
@@ -29,7 +28,7 @@ public final class ResourceStoreClassLoader extends ClassLoader {
 
     private final ResourceStore[] stores;
 
-    public ResourceStoreClassLoader( final ClassLoader pParent, final ResourceStore[] pStores ) {
+    public ResourceStoreClassLoader(final ClassLoader pParent, final ResourceStore[] pStores) {
         super(pParent);
         stores = pStores;
     }
@@ -41,34 +40,36 @@ public final class ResourceStoreClassLoader extends ClassLoader {
                 final ResourceStore store = stores[i];
                 final byte[] clazzBytes = store.read(ConversionUtils.convertClassToResourcePath(name));
                 if (clazzBytes != null) {
-//                    log.debug(getId() + " found class: " + name  + " (" + clazzBytes.length + " bytes)");
+                    // log.debug(getId() + " found class: " + name + " (" +
+                    // clazzBytes.length + " bytes)");
                     return defineClass(name, clazzBytes, 0, clazzBytes.length);
-                }            
+                }
             }
         }
-        
-        return null;            
+
+        return null;
     }
-    
+
     protected synchronized Class loadClass(String name, boolean resolve) throws ClassNotFoundException {
         // log.debug(getId() + " looking for: " + name);
         Class clazz = findLoadedClass(name);
 
         if (clazz == null) {
             clazz = fastFindClass(name);
-            
+
             if (clazz == null) {
 
                 final ClassLoader parent = getParent();
                 if (parent != null) {
                     clazz = parent.loadClass(name);
-                    // log.debug(getId() + " delegating loading to parent: " + name);
+                    // log.debug(getId() + " delegating loading to parent: " +
+                    // name);
                 } else {
                     throw new ClassNotFoundException(name);
                 }
-                
+
             } else {
-//                log.debug(getId() + " loaded from store: " + name);
+                // log.debug(getId() + " loaded from store: " + name);
             }
         }
 
@@ -79,14 +80,14 @@ public final class ResourceStoreClassLoader extends ClassLoader {
         return clazz;
     }
 
-    protected Class findClass( final String name ) throws ClassNotFoundException {
+    protected Class findClass(final String name) throws ClassNotFoundException {
         final Class clazz = fastFindClass(name);
         if (clazz == null) {
             throw new ClassNotFoundException(name);
         }
         return clazz;
     }
-    
+
     private String getId() {
         return "" + this + "[" + this.getClass().getClassLoader() + "]";
     }

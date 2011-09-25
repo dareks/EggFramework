@@ -27,93 +27,97 @@ import org.apache.commons.jci.ReloadingClassLoader;
 import org.apache.commons.jci.stores.FileResourceStore;
 
 /**
- * Run this class in order to run a web server with you application. Remember to specify java.library.path JVM 
- * option pointing to libs directory (-Djava.library.path=libs). 
+ * Run this class in order to run a web server with you application. Remember to
+ * specify java.library.path JVM option pointing to libs directory
+ * (-Djava.library.path=libs).
  * 
- * EXPERIMENTAL. Use with caution cause it generates PermGen exceptions on SunJVM and OutOfMemoryException in JRockit (memory leaks). 
- * At this moment a better approach is to use Server class instead and JRebel tool for automatic reloading.
+ * EXPERIMENTAL. Use with caution cause it generates PermGen exceptions on
+ * SunJVM and OutOfMemoryException in JRockit (memory leaks). At this moment a
+ * better approach is to use Server class instead and JRebel tool for automatic
+ * reloading.
  * 
- * TODO Server does not need to be stopped every time class file change. This class should check also if application
- * was started already. If it wasn't then do nothing
+ * TODO Server does not need to be stopped every time class file change. This
+ * class should check also if application was started already. If it wasn't then
+ * do nothing
  * 
  * @author Jacek Olszak
  */
 public class ReloadingServer {
 
-	private volatile boolean modified;
+    private volatile boolean modified;
 
-	public ReloadingServer() throws InterruptedException, IOException {
-		URLClassLoader urlClassLoader = (URLClassLoader) Thread.currentThread().getContextClassLoader();
-		ReloadingClassLoader pParent = new ReloadingClassLoader(urlClassLoader);
-		final ReloadingClassLoader loader = new ReloadingClassLoader(pParent);
-		for (URL url : urlClassLoader.getURLs()) {
-			String file = url.getFile();
-			if (!file.contains("commons-jci")) {
-				if (file.endsWith(".jar") || file.endsWith("/web.xml") || file.endsWith(".properties")) {
-					pParent.addResourceStore(new JarResourceStore(file));
-				} else {   
-					pParent.addResourceStore(new FileResourceStore(new File(file)));
-				}
-			}
-		}
-		Thread.currentThread().setContextClassLoader(loader);
+    public ReloadingServer() throws InterruptedException, IOException {
+        URLClassLoader urlClassLoader = (URLClassLoader) Thread.currentThread().getContextClassLoader();
+        ReloadingClassLoader pParent = new ReloadingClassLoader(urlClassLoader);
+        final ReloadingClassLoader loader = new ReloadingClassLoader(pParent);
+        for (URL url : urlClassLoader.getURLs()) {
+            String file = url.getFile();
+            if (!file.contains("commons-jci")) {
+                if (file.endsWith(".jar") || file.endsWith("/web.xml") || file.endsWith(".properties")) {
+                    pParent.addResourceStore(new JarResourceStore(file));
+                } else {
+                    pParent.addResourceStore(new FileResourceStore(new File(file)));
+                }
+            }
+        }
+        Thread.currentThread().setContextClassLoader(loader);
 
-		String classesDir = new File("target/classes").getAbsolutePath();                
-		int mask = JNotify.FILE_CREATED | JNotify.FILE_DELETED | JNotify.FILE_MODIFIED | JNotify.FILE_RENAMED;
-		boolean watchSubtree = true; 
-		try {
-			int watchID = JNotify.addWatch(classesDir, mask, watchSubtree, new JNotifyAdapter() {
-				@Override
-				public void fileModified(int wd, String rootPath, String name) {
-					if (name.endsWith(".class")) {
-						modified = true;
-					}
-				}
-			});
-		} catch (Exception e) {                
-			e.printStackTrace();         
-		}
-		startJetty();
-		while (true) { 
-			try { 
-				Thread.sleep(400);
-			} catch (InterruptedException e) {
-				break;
-			}
-			synchronized (ReloadingServer.class) {
-				if (modified) {
-					stopJetty();  
-					ReloadingClassLoader contextClassLoader = (ReloadingClassLoader) Thread.currentThread().getContextClassLoader();
-					contextClassLoader.handleNotification(); 
-					ReloadingClassLoader parent = (ReloadingClassLoader) contextClassLoader.getParent();
-					parent.handleNotification();
-					Thread.currentThread().setContextClassLoader(new ReloadingClassLoader(parent));
-					startJetty();
-					modified = false;
-				}
-			}
-		}
-	}
+        String classesDir = new File("target/classes").getAbsolutePath();
+        int mask = JNotify.FILE_CREATED | JNotify.FILE_DELETED | JNotify.FILE_MODIFIED | JNotify.FILE_RENAMED;
+        boolean watchSubtree = true;
+        try {
+            int watchID = JNotify.addWatch(classesDir, mask, watchSubtree, new JNotifyAdapter() {
+                @Override
+                public void fileModified(int wd, String rootPath, String name) {
+                    if (name.endsWith(".class")) {
+                        modified = true;
+                    }
+                }
+            });
+        } catch (Exception e) {
+            e.printStackTrace();
+        }
+        startJetty();
+        while (true) {
+            try {
+                Thread.sleep(400);
+            } catch (InterruptedException e) {
+                break;
+            }
+            synchronized (ReloadingServer.class) {
+                if (modified) {
+                    stopJetty();
+                    ReloadingClassLoader contextClassLoader = (ReloadingClassLoader) Thread.currentThread().getContextClassLoader();
+                    contextClassLoader.handleNotification();
+                    ReloadingClassLoader parent = (ReloadingClassLoader) contextClassLoader.getParent();
+                    parent.handleNotification();
+                    Thread.currentThread().setContextClassLoader(new ReloadingClassLoader(parent));
+                    startJetty();
+                    modified = false;
+                }
+            }
+        }
+    }
 
-	public static void main(String[] args) throws Exception {
-		new ReloadingServer();
-	}
+    public static void main(String[] args) throws Exception {
+        new ReloadingServer();
+    }
 
-	public static void startJetty() {
-		run("framework.ForkedJettyServer", "start");
-	}
+    public static void startJetty() {
+        run("framework.ForkedJettyServer", "start");
+    }
 
-	private static void run(String className, String method) {
-		try {
-			Class<?> clazz = Thread.currentThread().getContextClassLoader().loadClass(className);
-			Object obj = clazz.newInstance();
-			obj.getClass().getMethod(method).invoke(obj);
-		} catch (Exception e) {
-			e.printStackTrace();
-		}
-	}
+    private static void run(String className, String method) {
+        try {
+            Class<?> clazz = Thread.currentThread().getContextClassLoader().loadClass(className);
+            Object obj = clazz.newInstance();
+            obj.getClass().getMethod(method).invoke(obj);
+        } catch (Exception e) {
+            e.printStackTrace();
+        }
+    }
 
-	public static void stopJetty() {
-		run("framework.ForkedJettyServer", "stop");
-	}
+    public static void stopJetty() {
+        run("framework.ForkedJettyServer", "stop");
+    }
 }

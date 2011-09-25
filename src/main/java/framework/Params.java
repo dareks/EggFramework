@@ -23,18 +23,18 @@ import com.google.common.collect.Maps;
 
 public class Params {
 
-	HttpServletRequest request;
+    HttpServletRequest request;
 
-	public String get(String name) {
-		return request.getParameter(name);
-	}
+    public String get(String name) {
+        return request.getParameter(name);
+    }
 
-	public String[] getValues(String name) {
-		return request.getParameterValues(name);
-	}
-	
-	public Map<String, String[]> getMap() {
-		return Maps.newHashMap(request.getParameterMap());
-	}
-	
+    public String[] getValues(String name) {
+        return request.getParameterValues(name);
+    }
+
+    public Map<String, String[]> getMap() {
+        return Maps.newHashMap(request.getParameterMap());
+    }
+
 }
