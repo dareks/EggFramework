@@ -683,7 +683,13 @@ public class GlobalHelpers {
     // METHODS TO BE USED IN Application.start()
 
     public static Rule match(String matchPattern) {
-        return new Rule(matchPattern);
+        Rule rule = new Rule(matchPattern);
+        routing().addRule(rule);
+        return rule;
+    }
+
+    public static Routing routing() {
+        return FrameworkServlet.ROUTING;
     }
 
     // END OF METHODS TO BE USED IN Application.start()

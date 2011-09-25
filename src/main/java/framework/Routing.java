@@ -19,6 +19,7 @@ import framework.Rule.Pattern;
 public final class Routing {
 
     private List<Rule> rules = Lists.newArrayList();
+    private boolean closed;
 
     public Request route(String path, HttpServletRequest req) {
         for (Rule rule : rules) {
@@ -39,8 +40,20 @@ public final class Routing {
         return null;
     }
 
+    public boolean hasAnyRules() {
+        return !rules.isEmpty();
+    }
+
     public void addRule(Rule rule) {
-        this.rules.add(rule);
+        if (!closed) {
+            this.rules.add(rule);
+        } else {
+            throw new RuntimeException("Routing rules can only be added in start method of services.Application class");
+        }
+    }
+
+    public void close() {
+        closed = true;
     }
 
 }

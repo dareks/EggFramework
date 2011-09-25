@@ -29,17 +29,18 @@ public class FrameworkServlet extends HttpServlet {
 
     private static final long serialVersionUID = 1L;
 
+    static final Routing ROUTING = new Routing();
     static Object application;
-    static Routing routing;
     boolean started;
 
     private void createAndStartApplication() throws ServletException, ClassNotFoundException, InstantiationException, IllegalAccessException, InvocationTargetException, NoSuchMethodException {
         Class<?> appClass = Thread.currentThread().getContextClassLoader().loadClass("services.Application");
         application = appClass.newInstance();
-        routing = new Routing();
-        routing.addRule(new Rule("/index").rewrite("/sample/index"));
-        routing.addRule(new Rule("/$controller/$action"));
         application.getClass().getMethod("start").invoke(application);
+        if (!ROUTING.hasAnyRules()) {
+            ROUTING.addRule(new Rule("/$controller/$action"));
+        }
+        ROUTING.close();
         started = true;
     }
 
@@ -66,7 +67,7 @@ public class FrameworkServlet extends HttpServlet {
         try {
             Class<?> controllerClass = Thread.currentThread().getContextClassLoader().loadClass("framework.FrontController");
             Object controller = controllerClass.newInstance();
-            invoke("service", controller, req, resp, getServletContext(), routing);
+            invoke("service", controller, req, resp, getServletContext(), ROUTING);
         } catch (Exception e) {
             // TODO WTF?
             Throwable cause = e;
