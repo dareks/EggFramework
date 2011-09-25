@@ -642,9 +642,7 @@ public class GlobalHelpers {
     }
 
     /**
-     * VERY EXPERIMENTAL FEATURE. Generate piece of code depdening on passed
-     * object. It can generate ready to use HTML code for tables, forms, combo
-     * boxes etc.
+     * VERY EXPERIMENTAL FEATURE. Generate piece of code depdening on passed object. It can generate ready to use HTML code for tables, forms, combo boxes etc.
      */
     public static void scaffold(String name, Object o) throws IOException, IllegalArgumentException, IllegalAccessException {
         Writer out = out();
@@ -682,16 +680,23 @@ public class GlobalHelpers {
 
     // METHODS TO BE USED IN Application.start()
 
+    /**
+     * This method should be used in service.Application.start() method. It creates and add a rule to the routing.
+     * 
+     * @param matchPattern
+     *            A pattern which will be matched against an action path. You can use literals and parameters here. Parameter must be prefixed by dollar "$" sign. Sample pattern:
+     *            "/someLiteral/$param1". For more details see {@link Rule}
+     */
     public static Rule match(String matchPattern) {
         Rule rule = new Rule(matchPattern);
         routing().addRule(rule);
         return rule;
     }
 
+    // END OF METHODS TO BE USED IN Application.start()
+
     public static Routing routing() {
         return FrameworkServlet.ROUTING;
     }
-
-    // END OF METHODS TO BE USED IN Application.start()
 
 }

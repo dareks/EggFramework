@@ -1,15 +1,14 @@
 package services;
 
 import static framework.GlobalHelpers.*;
-import framework.Rule;
 
 public class Application {
 
     public void start() throws Exception {
         System.out.println("Starting...");
 
-        routing().addRule(new Rule("/index").rewrite("/sample/index"));
-        routing().addRule(new Rule("/$controller/$action"));
+        match("/index").rewrite("/sample/index");
+        match("/$controller/$action");
     }
 
     public void stop() {

@@ -1,3 +1,18 @@
+/*
+ *   Copyright (C) 2011 Jacek Olszak
+ *
+ *   Licensed under the Apache License, Version 2.0 (the "License");
+ *   you may not use this file except in compliance with the License.
+ *   You may obtain a copy of the License at
+ *
+ *      http://www.apache.org/licenses/LICENSE-2.0
+ *
+ *   Unless required by applicable law or agreed to in writing, software
+ *   distributed under the License is distributed on an "AS IS" BASIS,
+ *   WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+ *   See the License for the specific language governing permissions and
+ *   limitations under the License.
+ */
 package framework;
 
 import java.util.List;
@@ -6,6 +21,23 @@ import java.util.Map;
 import com.google.common.collect.Lists;
 import com.google.common.collect.Maps;
 
+/**
+ * Routing rule.<br>
+ * <br>
+ * Sample patterns: <br>
+ * <code>
+ *  /articles/$id <br>
+ *  /$controller/$action/$id <br>
+ *  /$controller/$action <br>
+ * </code> <br>
+ * Parameter names are starting with dollar '$' sign and can contain any character. The exceptions are following characters: '/' (slash), ' ' (space), '.' (dot) and '-' (dash). Examples:<br>
+ * <code>
+ *  /articles/$id-$category/$region  gives the following parts: '/articles/' literal, 'id' parameter, '-' literal, 'category' parameter, '/' literal, 'region' parameter
+ * </code>
+ * 
+ * @author Jacek Olszak
+ * 
+ */
 public final class Rule {
 
     private final Pattern pattern;
@@ -20,6 +52,12 @@ public final class Rule {
         return pattern;
     }
 
+    /**
+     * When pattern is matched then the action path is being rewritten to the one specified.
+     * 
+     * @param pathPattern
+     *            New action path. You can use parameters here.
+     */
     public Rule rewrite(String pathPattern) {
         this.rewritePattern = new Pattern(pathPattern);
         return this;

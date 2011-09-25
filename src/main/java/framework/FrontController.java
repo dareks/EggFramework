@@ -73,7 +73,7 @@ public class FrontController {
             Response response = runBefore(request.getController(), data);
             if (response == null) {
                 if (!errors.hasErrors()) {
-                    ActionValidationConfig validationsConfig = ActionValidationConfig.get(request.getPath()); // TODO
+                    ActionValidationConfig validationsConfig = ActionValidationConfig.get(request.getPath());
                     validationsConfig.validate(data.params, errors);
                     if (errors.hasErrors()) {
                         path = validationsConfig.getInputPath();
