@@ -52,9 +52,9 @@ public class Config {
             FileReader fileReader = new FileReader(file);
             properties.load(fileReader);
         } catch (FileNotFoundException e) {
-            e.printStackTrace();
+            Loggers.CONFIG.error(e.getMessage(), e);
         } catch (IOException e) {
-            e.printStackTrace();
+            Loggers.CONFIG.error(e.getMessage(), e);
         }
     }
 

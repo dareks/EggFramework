@@ -25,12 +25,7 @@ import javax.servlet.ServletRequest;
 import javax.servlet.ServletResponse;
 import javax.servlet.http.HttpServletRequest;
 
-import org.slf4j.Logger;
-import org.slf4j.LoggerFactory;
-
 public class BenchmarkFilter implements Filter {
-
-    private final Logger logger = LoggerFactory.getLogger("framework.Benchmark");
 
     public void init(FilterConfig filterConfig) throws ServletException {
     }
@@ -41,7 +36,7 @@ public class BenchmarkFilter implements Filter {
         try {
             chain.doFilter(request, response);
         } finally {
-            logger.info("Path {} rendering time is {} ms", req.getServletPath(), System.currentTimeMillis() - started);
+            Loggers.BENCHMARK.info("Path {} rendering time is {} ms", req.getServletPath(), System.currentTimeMillis() - started);
         }
     }
 

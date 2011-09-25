@@ -48,7 +48,7 @@ public class FrameworkServlet extends HttpServlet {
         try {
             application.getClass().getMethod("stop").invoke(application);
         } catch (Exception e) {
-            e.printStackTrace();
+            Loggers.CONTROLLER.error(e.getMessage(), e);
         }
     }
 

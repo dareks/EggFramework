@@ -86,7 +86,7 @@ public class GlobalHelpers {
             }
             return builder.toString();
         } catch (Exception e) {
-            e.printStackTrace();
+            Loggers.TEMPLATE.error(e.getMessage(), e);
             return e.getMessage();
         }
     }
@@ -144,7 +144,7 @@ public class GlobalHelpers {
         try {
             Template.render(file, model, writer);
         } catch (Exception e) {
-            e.printStackTrace();
+            Loggers.TEMPLATE.error(e.getMessage(), e);
             return e.getMessage();
         }
         return writer.toString();
@@ -198,7 +198,7 @@ public class GlobalHelpers {
         try {
             return new ObjectMapper().writeValueAsString(object);
         } catch (Exception e) {
-            e.printStackTrace();
+            Loggers.TEMPLATE.error(e.getMessage(), e);
             return e.getMessage();
         }
     }

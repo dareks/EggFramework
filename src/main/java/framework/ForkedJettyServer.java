@@ -48,7 +48,7 @@ public class ForkedJettyServer {
         try {
             server.start();
         } catch (Exception e) {
-            e.printStackTrace();
+            Loggers.SERVER.error(e.getMessage(), e);
         }
     }
 

@@ -69,7 +69,7 @@ public class ReloadingServer {
                 }
             });
         } catch (Exception e) {
-            e.printStackTrace();
+            Loggers.SERVER.error(e.getMessage(), e);
         }
         startJetty();
         while (true) {
@@ -107,7 +107,7 @@ public class ReloadingServer {
             Object obj = clazz.newInstance();
             obj.getClass().getMethod(method).invoke(obj);
         } catch (Exception e) {
-            e.printStackTrace();
+            Loggers.SERVER.error(e.getMessage(), e);
         }
     }
 

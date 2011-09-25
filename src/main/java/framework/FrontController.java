@@ -127,10 +127,10 @@ public class FrontController {
         } catch (FileNotFoundException e) {
             res.sendError(404, e.getMessage());
         } catch (IOException e) {
-            e.printStackTrace();
+            Loggers.CONTROLLER.error(e.getMessage(), e);
             throw e;
         } catch (ServletException e) {
-            e.printStackTrace();
+            Loggers.CONTROLLER.error(e.getMessage(), e);
             throw e;
         } finally {
             data.flash.saveToSession(req);

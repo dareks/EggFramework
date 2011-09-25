@@ -42,7 +42,7 @@ public class AMFGateway extends HttpServlet {
             ActionContext actionContext = new ActionContext();
             deserializer.readMessage(inputMessage, actionContext);
             if (traceEnabled) {
-                System.out.println(inTrace);
+                Loggers.CONTROLLER.info("{}", inTrace);
             }
 
             AmfTrace outTrace = traceEnabled ? new AmfTrace() : null;
@@ -67,11 +67,11 @@ public class AMFGateway extends HttpServlet {
             }
             serializer.writeMessage(outputMessage);
             if (traceEnabled) {
-                System.out.println(outTrace);
+                Loggers.CONTROLLER.info("{}", outTrace);
             }
         } catch (ClassNotFoundException e) {
             resp.sendError(400, e.getMessage());
-            e.printStackTrace();
+            Loggers.CONTROLLER.error(e.getMessage(), e);
         }
         resp.getOutputStream().flush();
     }

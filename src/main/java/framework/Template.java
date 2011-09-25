@@ -28,9 +28,6 @@ import java.io.Writer;
 import java.util.Hashtable;
 import java.util.Map;
 
-import org.slf4j.Logger;
-import org.slf4j.LoggerFactory;
-
 import framework.GroovyRunner.GroovyClassLoaderRunner;
 import framework.GroovyRunner.GroovyScriptEngineRunner;
 import groovy.lang.Binding;
@@ -41,8 +38,6 @@ public class Template {
 
     private static GroovyRunner groovyRunner;
 
-    private static final Logger benchmarkLogger = LoggerFactory.getLogger("framework.Benchmark");
-
     static {
         try {
             if ("production".equalsIgnoreCase(config("mode"))) {
@@ -51,7 +46,7 @@ public class Template {
                 groovyRunner = new GroovyScriptEngineRunner();
             }
         } catch (Exception e) {
-            e.printStackTrace();
+            Loggers.TEMPLATE.error(e.getMessage(), e);
         }
     }
 
@@ -76,7 +71,7 @@ public class Template {
         }
         long started = System.currentTimeMillis();
         groovyRunner.run(groovySourceFile, binding);
-        benchmarkLogger.info("Template {} rendering time is {} ms", template, (System.currentTimeMillis() - started));
+        Loggers.BENCHMARK.info("Template {} rendering time is {} ms", template, (System.currentTimeMillis() - started));
     }
 
     private static String generateSourceFile(String template) throws IOException, FileNotFoundException {

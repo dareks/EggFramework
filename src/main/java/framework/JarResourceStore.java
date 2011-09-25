@@ -50,7 +50,7 @@ public class JarResourceStore implements ResourceStore {
                 }
             }
         } catch (IOException e) {
-            e.printStackTrace();
+            Loggers.RELOADER.error(e.getMessage(), e);
         } finally {
             if (jar != null) {
                 try {

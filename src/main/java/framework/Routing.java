@@ -20,9 +20,6 @@ import java.util.Map;
 
 import javax.servlet.http.HttpServletRequest;
 
-import org.slf4j.Logger;
-import org.slf4j.LoggerFactory;
-
 import com.google.common.collect.Lists;
 
 import framework.Rule.Pattern;
@@ -38,8 +35,6 @@ public final class Routing {
     private List<Rule> rules = Lists.newArrayList();
     private boolean closed;
 
-    private final Logger logger = LoggerFactory.getLogger(Routing.class);
-
     public Request route(String path, HttpServletRequest req) {
         for (Rule rule : rules) {
             Map<String, String> map = rule.getPattern().matches(path.toCharArray());
@@ -47,10 +42,10 @@ public final class Routing {
                 Pattern rewrite = rule.getRewritePattern();
                 if (rewrite != null) {
                     String rewritePath = rewrite.toString(map);
-                    logger.info("Match found {} => Rewriting to {}", rule.getPattern(), rewritePath);
+                    Loggers.ROUTING.info("Match found {} => Rewriting to {}", rule.getPattern(), rewritePath);
                     return route(rewritePath, req);
                 } else {
-                    logger.info("Match found {}", rule.getPattern());
+                    Loggers.ROUTING.info("Match found {}", rule.getPattern());
                     return new Request(req, map);
                 }
             }
