@@ -34,11 +34,16 @@ import java.util.HashMap;
 import java.util.Hashtable;
 import java.util.Map;
 
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
+
 public class Template {
 
     // TODO USE GroovyClassLoader on production instead
     private static GroovyScriptEngine gse;
     private static Map<String, Long> filemodificationDates = new Hashtable<String, Long>();
+
+    private static final Logger benchmarkLogger = LoggerFactory.getLogger("framework.Benchmark");
 
     static {
         try {
@@ -69,7 +74,7 @@ public class Template {
         }
         long started = System.currentTimeMillis();
         gse.run(groovySourceFile, binding);
-        System.out.println("---- Time spent in rendering template " + template + " is " + (System.currentTimeMillis() - started) + " ms");
+        benchmarkLogger.info("Template {} rendering time is {} ms", template, (System.currentTimeMillis() - started));
     }
 
     private static String generateSourceFile(String template) throws IOException, FileNotFoundException {

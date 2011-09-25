@@ -109,7 +109,6 @@ public class ReloadingClassLoader extends ClassLoader implements ReloadNotificat
     }
 
     public Class loadClass(String name) throws ClassNotFoundException {
-        System.out.println(name);
         return delegate.loadClass(name);
     }
 

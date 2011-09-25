@@ -25,19 +25,23 @@ import javax.servlet.ServletRequest;
 import javax.servlet.ServletResponse;
 import javax.servlet.http.HttpServletRequest;
 
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
+
 public class BenchmarkFilter implements Filter {
+
+    private final Logger logger = LoggerFactory.getLogger("framework.Benchmark");
 
     public void init(FilterConfig filterConfig) throws ServletException {
     }
 
     public void doFilter(ServletRequest request, ServletResponse response, FilterChain chain) throws IOException, ServletException {
         HttpServletRequest req = (HttpServletRequest) request;
-        System.out.printf("\n------------------------------ %15s ------------------------------\n", req.getServletPath());
         long started = System.currentTimeMillis();
         try {
             chain.doFilter(request, response);
         } finally {
-            System.out.printf("------------------------------ %12d ms ------------------------------ \n", System.currentTimeMillis() - started);
+            logger.info("Path {} rendering time is {} ms", req.getServletPath(), System.currentTimeMillis() - started);
         }
     }
 

@@ -169,7 +169,6 @@ public class GlobalHelpers {
         Response response = new Response();
         response.template = "/" + req().getController() + "/" + partial;
         response.partial = true;
-        System.out.println(response.template);
         return response;
     }
 

@@ -34,7 +34,6 @@ public final class ResourceStoreClassLoader extends ClassLoader {
     }
 
     private Class fastFindClass(final String name) {
-        System.out.println(name);
         if (stores != null) {
             for (int i = 0; i < stores.length; i++) {
                 final ResourceStore store = stores[i];
