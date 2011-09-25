@@ -18,37 +18,39 @@ package framework;
 //import groovy.lang.Binding;
 //import groovy.util.GroovyScriptEngine;
 import static framework.GlobalHelpers.*;
-import groovy.lang.Binding;
-import groovy.util.GroovyScriptEngine;
-import groovy.util.ResourceException;
-import groovy.util.ScriptException;
 
 import java.io.File;
 import java.io.FileNotFoundException;
 import java.io.FileReader;
 import java.io.FileWriter;
 import java.io.IOException;
-import java.io.PrintWriter;
 import java.io.Writer;
-import java.util.HashMap;
 import java.util.Hashtable;
 import java.util.Map;
 
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
+import framework.GroovyRunner.GroovyClassLoaderRunner;
+import framework.GroovyRunner.GroovyScriptEngineRunner;
+import groovy.lang.Binding;
+
 public class Template {
 
-    // TODO USE GroovyClassLoader on production instead
-    private static GroovyScriptEngine gse;
     private static Map<String, Long> filemodificationDates = new Hashtable<String, Long>();
+
+    private static GroovyRunner groovyRunner;
 
     private static final Logger benchmarkLogger = LoggerFactory.getLogger("framework.Benchmark");
 
     static {
         try {
-            gse = new GroovyScriptEngine(new String[] { "" });
-        } catch (IOException e) {
+            if ("production".equalsIgnoreCase(config("mode"))) {
+                groovyRunner = new GroovyClassLoaderRunner();
+            } else {
+                groovyRunner = new GroovyScriptEngineRunner();
+            }
+        } catch (Exception e) {
             e.printStackTrace();
         }
     }
@@ -57,7 +59,7 @@ public class Template {
         return new File("target/classes/" + template + ".html").exists();
     }
 
-    public static void render(String template, Map<String, Object> model, Writer writer) throws IOException, ResourceException, ScriptException {
+    public static void render(String template, Map<String, Object> model, Writer writer) throws Exception {
         if (!template.startsWith("/")) {
             template = req().getController() + "/" + template;
         }
@@ -73,7 +75,7 @@ public class Template {
             }
         }
         long started = System.currentTimeMillis();
-        gse.run(groovySourceFile, binding);
+        groovyRunner.run(groovySourceFile, binding);
         benchmarkLogger.info("Template {} rendering time is {} ms", template, (System.currentTimeMillis() - started));
     }
 
@@ -97,11 +99,6 @@ public class Template {
             filemodificationDates.put(name, lastModified);
         }
         return groovySourceFile;
-    }
-
-    public static void main(String[] args) throws IOException, ResourceException, ScriptException {
-        Map<String, Object> map = new HashMap<String, Object>();
-        render("bank", map, new PrintWriter(System.out));
     }
 
     private static void parse(File file, Writer writer) throws FileNotFoundException, IOException {
