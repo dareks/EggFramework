@@ -69,7 +69,8 @@ public class AsyncForward extends Response implements AsyncListener {
         synchronized (this) {
             error = true;
         }
-        event.getThrowable().printStackTrace();
+        Throwable throwable = event.getThrowable();
+        Loggers.CONTROLLER.error(throwable.getMessage(), throwable);
         try {
             ((HttpServletResponse) asyncContext.getResponse()).sendError(500);
         } catch (IOException e) {

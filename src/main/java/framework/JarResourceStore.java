@@ -56,7 +56,7 @@ public class JarResourceStore implements ResourceStore {
                 try {
                     jar.close();
                 } catch (IOException e2) {
-                    e2.printStackTrace();
+                    Loggers.RELOADER.error(e2.getMessage(), e2);
                 }
             }
         }
