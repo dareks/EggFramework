@@ -32,11 +32,11 @@ public class BenchmarkFilter implements Filter {
 
     public void doFilter(ServletRequest request, ServletResponse response, FilterChain chain) throws IOException, ServletException {
         HttpServletRequest req = (HttpServletRequest) request;
-        long started = System.currentTimeMillis();
+        long started = System.nanoTime();
         try {
             chain.doFilter(request, response);
         } finally {
-            Loggers.BENCHMARK.info("Path {} rendering time is {} ms", req.getServletPath(), System.currentTimeMillis() - started);
+            Loggers.BENCHMARK.info("Path {} rendering time is {} us", req.getServletPath(), (System.nanoTime() - started) / 1000);
         }
     }
 
