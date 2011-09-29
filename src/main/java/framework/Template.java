@@ -169,11 +169,12 @@ public class Template {
             }
         } else if (ch == '\'' && s != 3 && s != 6) {
             writer.append("\\'");
+        } else if (ch == '\\') {
+            writer.append("\\\\");
         } else if (ch == '$') {
             writer.append("\\$");
         } else {
             writer.write(ch);
         }
     }
-
 }
