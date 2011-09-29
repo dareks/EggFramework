@@ -23,6 +23,8 @@ import groovy.util.GroovyScriptEngine;
 
 import java.io.File;
 import java.io.IOException;
+import java.util.Hashtable;
+import java.util.Map;
 
 public interface GroovyRunner {
 
@@ -52,15 +54,23 @@ public interface GroovyRunner {
 
         private GroovyClassLoader gcl;
 
+        private Map<String, GroovyCodeSource> cachedSources = new Hashtable<String, GroovyCodeSource>();
+
         public GroovyClassLoaderRunner() {
             gcl = new GroovyClassLoader();
         }
 
         public void run(String scriptName, Binding binding) throws Exception {
-            Class<?> clazz = gcl.parseClass(new GroovyCodeSource(new File(scriptName)), true);
+            GroovyCodeSource source = cachedSources.get(scriptName);
+            if (source == null) {
+                source = new GroovyCodeSource(new File(scriptName));
+                cachedSources.put(scriptName, source);
+            }
+            Class<?> clazz = gcl.parseClass(source, true);
             Script script = (Script) clazz.newInstance();
             script.setBinding(binding);
-            script.invokeMethod("run", new Object[0]);
+            script.run();
         }
     }
+
 }

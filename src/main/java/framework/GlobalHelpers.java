@@ -135,6 +135,10 @@ public class GlobalHelpers {
         return Config.get(key);
     }
 
+    public static String config(String key, String defaultValue) {
+        return Config.get(key, defaultValue);
+    }
+
     public static CharSequence parse(String file) {
         return parse(file, null);
     }
