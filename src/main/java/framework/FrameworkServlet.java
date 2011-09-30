@@ -64,6 +64,7 @@ public class FrameworkServlet extends HttpServlet {
             }
         }
         try {
+            // TODO Controller should be created only once for whole application
             Class<?> controllerClass = Thread.currentThread().getContextClassLoader().loadClass("framework.FrontController");
             Object controller = controllerClass.newInstance();
             invoke("service", controller, req, resp, getServletContext(), ROUTING);

@@ -36,7 +36,8 @@ public class Action {
 
     public synchronized Response execute(ThreadData data) throws InstantiationException, IllegalAccessException, IllegalArgumentException, InvocationTargetException {
         Object controller = clazz.newInstance();
-        // IoC by name or type
+        // IoC by name
+        // TODO what about IoC by type?
         Field field = findInheritedField(controller.getClass(), "app");
         if (field != null) {
             field.setAccessible(true);

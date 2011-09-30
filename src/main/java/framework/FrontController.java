@@ -32,6 +32,7 @@ import javax.servlet.http.HttpServletResponse;
 import framework.validation.ActionValidationConfig;
 import framework.validation.Errors;
 
+// TODO Access to partial directly from browser should not be possible
 public class FrontController {
 
     private static final long serialVersionUID = 1L;

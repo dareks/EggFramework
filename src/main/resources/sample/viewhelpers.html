@@ -1,0 +1,37 @@
+This page shows usage of helper methods on the view layer. Helper methods are Java static public methods defined in framework.GlobalHelpers and view.Helpers (user defined) to be used in views and controllers. Here are some examples of how to use them in the templates: 
+
+<h3>Some of framework.GlobalHelpers:</h3>
+
+<div>
+	<code>link("index", "Go to index using link()")</code> <br />
+	<%= link("index", "Go to index using link()") %> <br /><br />
+</div>
+
+<div>
+	<code>&lt;a href="&lt;%= action('index') %>">Go to index using action()</a></code><br />
+	<a href="<%= action('index') %>">Go to index using action()</a> <br /><br />
+</div>
+
+<!-- jquery15.js will be loaded from src/main/webapp/resources/jquery15.js (src/main/webapp/resources is a publicly available directory) -->
+<div>
+	<code>&lt;script src='&lt;%= resource("jquery15.js") %>'>&lt;/script> (see the source code of this page)</code> <br />
+	<script src='<%= resource("jquery15.js") %>'></script> <br />
+</div>
+
+<div>
+	<code>&lt;%= parse("_somePartial", ['me':'helpers.html']) %></code><br />
+	<%= parse("_somePartial", ['me':'helpers.html']) %> <br /> <br />
+</div>
+
+<div>
+	<code>Parameter "paramYouDidNotPass" is "&lt;%= nvl(param('paramYouDidNotPass'), 'not given') %>"</code><br />
+	Parameter "paramYouDidNotPass" is "<%= nvl(param('paramYouDidNotPass'), 'not given') %>" <br /> <br />
+</div>
+
+
+<h3>Custom view.Helpers:</h3>
+
+<div>
+	<code>	User is &lt;%= isAuthenticated() ? "" : "not" %> authenticated</code> <br />
+	User is <%= isAuthenticated() ? "" : "not" %> authenticated  <br /> <br />
+</div>

@@ -166,12 +166,16 @@ public class GlobalHelpers {
     }
 
     public static Response renderAction(String action) {
-        return renderAction("/" + req().getController(), action);
+        return renderAction(req().getController(), action);
     }
 
     public static Response renderPartial(String partial) {
+        return renderPartial(req().getController(), partial);
+    }
+
+    public static Response renderPartial(String controller, String partial) {
         Response response = new Response();
-        response.template = "/" + req().getController() + "/" + partial;
+        response.template = "/" + controller + "/" + partial;
         response.partial = true;
         return response;
     }
@@ -253,7 +257,7 @@ public class GlobalHelpers {
         return FrontController.threadData.get().params.get(name);
     }
 
-    public static String session(String name) {
+    public static <T> T session(String name) {
         return FrontController.threadData.get().session.get(name);
     }
 
@@ -613,8 +617,12 @@ public class GlobalHelpers {
         return false;
     }
 
-    public static String nvl(Object obj) {
+    public static String toString(Object obj) {
         return obj == null ? "" : obj.toString();
+    }
+
+    public static Object nvl(Object obj, Object replaceWith) {
+        return obj == null ? replaceWith : obj;
     }
 
     public static int sum(Iterable<Integer> numbers) {
