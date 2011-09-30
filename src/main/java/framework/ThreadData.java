@@ -21,6 +21,7 @@ import java.io.Writer;
 import javax.servlet.http.HttpServletRequest;
 import javax.servlet.http.HttpServletResponse;
 
+// TODO Add support for getting HTTP headers
 public class ThreadData {
 
     public final Request request;

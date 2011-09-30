@@ -86,11 +86,11 @@ public class FrontController {
                     if (response instanceof AsyncForward) {
                         return;
                     }
-                    if (response.action != null) {
+                    if (response.isForward()) {
                         req.getRequestDispatcher(response.action).forward(req, res);
                         return;
                     }
-                    if (response.redirect != null) {
+                    if (response.isRedirect()) {
                         sendRedirect(res, data, response);
                         return;
                     }
@@ -99,17 +99,21 @@ public class FrontController {
                 if (response instanceof AsyncForward) {
                     return;
                 }
-                if (response.action != null) {
+                if (response.isForward()) {
                     req.getRequestDispatcher(response.action).forward(req, res);
                     return;
                 }
-                if (response.redirect != null) {
+                if (response.isRedirect()) {
                     sendRedirect(res, data, response);
                     return;
                 }
             }
             if (response != null) {
+                if (response.bufferSize != null) {
+                    res.setBufferSize(response.bufferSize);
+                }
                 res.setContentType(response.contentType);
+                res.setStatus(response.status);
             }
             boolean servletIncluded = req.getAttribute(ACTION_URI) != null;
             if (!servletIncluded && (response == null || response.template != null)) {

@@ -15,15 +15,77 @@
  */
 package framework;
 
+// TODO Add support for specifying HTTP headers
 public class Response {
 
-    public String action;
-    public String redirect;
-    public String template;
-    public boolean partial;
-    public String text;
-    public String contentType = "text/html; charset=utf-8";
-    public byte[] bytes;
-    public Object singleObject;
+    String action;
+    String redirect;
+    String template;
+    boolean partial;
+    String text;
+    byte[] bytes;
+    Object singleObject;
+    String contentType = "text/html; charset=utf-8";
+    Integer bufferSize;
+    int status = 200;
+
+    public String getAction() {
+        return action;
+    }
+
+    public boolean isForward() {
+        return action != null;
+    }
+
+    public boolean isRedirect() {
+        return redirect != null;
+    }
+
+    public String getRedirect() {
+        return redirect;
+    }
+
+    public String getTemplate() {
+        return template;
+    }
+
+    public boolean isPartial() {
+        return partial;
+    }
+
+    public String getText() {
+        return text;
+    }
+
+    public byte[] getBytes() {
+        return bytes;
+    }
+
+    public String getContentType() {
+        return contentType;
+    }
+
+    public Response withContentType(String contentType) {
+        this.contentType = contentType;
+        return this;
+    }
+
+    public Integer getBufferSize() {
+        return bufferSize;
+    }
+
+    public Response withBufferSize(int bufferSize) {
+        this.bufferSize = bufferSize;
+        return this;
+    }
+
+    public int getStatus() {
+        return status;
+    }
+
+    public Response withStatus(int status) {
+        this.status = status;
+        return this;
+    }
 
 }

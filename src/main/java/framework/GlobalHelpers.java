@@ -189,6 +189,12 @@ public class GlobalHelpers {
         return response;
     }
 
+    public static Response renderBytes(byte[] bytes) {
+        Response response = new Response();
+        response.bytes = bytes;
+        return response;
+    }
+
     // TODO Optimize
     public static Response renderJSON(Object object) {
         Response response = new Response();
