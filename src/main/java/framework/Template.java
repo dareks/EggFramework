@@ -144,6 +144,17 @@ public class Template {
                 } else if (s == 5) {
                     s = 3;
                     writer.append('%');
+                } else if (ch == '\n') {
+                    if (s == 0) {
+                        writer.append("\\n'\nout.write '");
+                    } else {
+                        writer.append(" ");
+                    }
+                    s = 0;
+                } else if (ch == '\r') {
+                    if (s != 0) {
+                        writer.append(" ");
+                    }
                 } else {
                     addChar(writer, s, ch);
                 }
@@ -157,17 +168,7 @@ public class Template {
     }
 
     private static void addChar(Writer writer, int s, int ch) throws IOException {
-        if (ch == '\n') {
-            if (s == 0) {
-                writer.write("\\n");
-            } else {
-                writer.write(" ");
-            }
-        } else if (ch == '\r') {
-            if (s != 0) {
-                writer.write(" ");
-            }
-        } else if (ch == '\'' && s != 3 && s != 6) {
+        if (ch == '\'' && s != 3 && s != 6) {
             writer.append("\\'");
         } else if (ch == '\\') {
             writer.append("\\\\");
