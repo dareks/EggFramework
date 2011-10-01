@@ -4,8 +4,8 @@
 		<link rel="stylesheet" href="<%= resource('style.css') %>" />
 	</head>
 	<body>
-		<b>Menu:</b> <%= link("index", "index") %> | <%= link("text", "text") %> | <%= link("json", "json") %> | <%= link("partial", "partial") %> | <%= link("forwardTest", "forwardTest") %> | <%= link("redirectTest", "redirectTest") %> | <%= link("configTest", "configTest") %> | <%= link("viewHelpers", "viewHelpers") %> ||
-		<%= link("before", "securityTest", "before") %> || <%= link("ioc", "runService", "ioc") %> || <%= link("forms", "validatedForm", "validatedForm") %> <br /><br />
+		<b>Menu:</b> <%= link("index", "Index") %> | <%= link("text", "Render text") %> | <%= link("json", "Render JSON") %> | <%= link("partial", "Partial") %> | <%= link("forwardTest", "Forward") %> | <%= link("redirectTest", "Redirect") %> | <%= link("configTest", "Configuration") %> | <%= link("viewHelpers", "View helpers") %> ||
+		<%= link("before", "securityTest", "Before interceptor") %> || <%= link("ioc", "runService", "Inversion of Control") %> || <%= link("forms", "validatedForm", "Validated form") %> || <%= link("amf", "client", "Flash AMF") %> <br /><br />
 		<!-- content is a special variable containing the template associated for given action, i.e. sample/index.html -->
 		<%= content %>		
 	</body>
