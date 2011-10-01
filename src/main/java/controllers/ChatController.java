@@ -25,7 +25,6 @@ public class ChatController {
     public AsyncForward _listen() {
         final AsyncForward forward = asyncForward();
         Date date = new Date(paramAsLong("date", new Date().getTime()));
-        System.out.println("LISTEN " + date);
         app.chatService.register(date, new ChatCallback() {
             public void onMessages(List<Message> messages) {
                 forward.attr("textMessages", messages); // sets the attribute which will be passed to _listenAsync
