@@ -1,0 +1,21 @@
+<!DOCTYPE HTML>
+<html>
+	<head>
+		<link rel="stylesheet" href="<%= resource('style.css') %>" />
+	</head>
+<body>
+	<ul>
+		<% errors.messages.each { %>
+			<li><%= it %></li>
+		<% } %>
+	</ul>
+	<form action="<%= action('createUser') %>">
+		<label for="name">Name*</label>							<input type="text" name="name" value="<%= form.name %>" />				<br />		
+		<label for="street">Street*</label>						<input type="text" name="street" value="<%= form.street %>" />			<br />
+		<label for="postalCode">Postal code (xx-xxx)</label>	<input type="text" name="postalCode" value="<%= form.postalCode %>" />	<br />
+		<label for="city">City</label>							<input type="text" name="city" value="<%= form.city %>" />				<br />
+		<label for="country">Country</label>					<input type="text" name="country" value="<%= form.country %>" />		<br />
+		<input type="submit" />
+	</form>
+</body>
+</html>

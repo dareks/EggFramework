@@ -1,37 +1,59 @@
-This page shows usage of helper methods on the view layer. Helper methods are Java static public methods defined in framework.GlobalHelpers and view.Helpers (user defined) to be used in views and controllers. Here are some examples of how to use them in the templates: 
+This page shows usage of helper methods on the view layer. Helper methods are Java static public methods defined in framework.GlobalHelpers and view.Helpers (user defined) to be used in views and controllers. 
+Check the source code of classes <u>framework.GlobalHelpers</u> and <u>view.Helpers</u> for details. Here are some examples of how to use them in the templates: 
 
 <h3>Some of framework.GlobalHelpers:</h3>
 
-<div>
-	<code>link("index", "Go to index using link()")</code> <br />
-	<%= link("index", "Go to index using link()") %> <br /><br />
+<div class="example">
+	<i>link - generates HTML link (a href)</i>
+	<code>link("index", "Go to index using link()")</code>
+	
+	<%= link("index", "Go to index using link()") %> 
 </div>
 
-<div>
-	<code>&lt;a href="&lt;%= action('index') %>">Go to index using action()</a></code><br />
-	<a href="<%= action('index') %>">Go to index using action()</a> <br /><br />
+<div class="example">
+	<i>action - generates url for action</i>
+	<code>&lt;a href="&lt;%= action('index') %>">Go to index using action()&lt;/a></code>
+	
+	<a href="<%= action('index') %>">Go to index using action()</a> 
 </div>
 
 <!-- jquery15.js will be loaded from src/main/webapp/resources/jquery15.js (src/main/webapp/resources is a publicly available directory) -->
-<div>
-	<code>&lt;script src='&lt;%= resource("jquery15.js") %>'>&lt;/script> (see the source code of this page)</code> <br />
-	<script src='<%= resource("jquery15.js") %>'></script> <br />
+<div class="example">
+	<i>resource - generates url for resource</i>
+	<code>&lt;script src='&lt;%= resource("jquery15.js") %>'>&lt;/script> &lt;!-- see the source code of this page --></code>
+	
+	<script src='<%= resource("jquery15.js") %>'></script>
 </div>
 
-<div>
-	<code>&lt;%= parse("_somePartial", ['me':'helpers.html']) %></code><br />
-	<%= parse("_somePartial", ['me':'helpers.html']) %> <br /> <br />
+<div class="example">
+	<i>parse - include given template and pass parameters to it</i>
+	<code>&lt;%= parse("_somePartial", ['me':'helpers.html']) %></code>
+	
+	<%= parse("_somePartial", ['me':'helpers.html']) %> 
 </div>
 
-<div>
-	<code>Parameter "paramYouDidNotPass" is "&lt;%= nvl(param('paramYouDidNotPass'), 'not given') %>"</code><br />
-	Parameter "paramYouDidNotPass" is "<%= nvl(param('paramYouDidNotPass'), 'not given') %>" <br /> <br />
+<div class="example">
+	<i>nvl - returns first parameter or default value if first parameter is null</i>
+	<code>Parameter "paramYouDidNotPass" is "&lt;%= nvl(param('paramYouDidNotPass'), 'not given') %>"</code>
+	
+	Parameter "paramYouDidNotPass" is "<%= nvl(param('paramYouDidNotPass'), 'not given') %>" 
 </div>
 
 
 <h3>Custom view.Helpers:</h3>
 
-<div>
-	<code>	User is &lt;%= isAuthenticated() ? "" : "not" %> authenticated</code> <br />
-	User is <%= isAuthenticated() ? "" : "not" %> authenticated  <br /> <br />
+<div class="example">
+	<i>isAuthenticated - custom method for checking if user is authenticated</i>
+	<code>	User is &lt;%= isAuthenticated() ? "" : "not" %> authenticated</code>
+	
+	User is <%= isAuthenticated() ? "" : "not" %> authenticated 
+</div>
+
+<div class="example">
+	<i>closure - sample use of closure</i>
+	<code> &lt;% bold() { %> <br />   This part will be bolded by bold() helper method. You can insert here whatever you like - static content, scriplets, run other helper methods - everything will be evaluated lazily. <br /> &lt;% } %> </code>
+	
+	<% bold() { %>
+		This part will be bolded by bold() helper method. You can insert here whatever you like - static content, scriplets, run other helper methods - everything will be evaluated lazily
+	<% } %>
 </div>

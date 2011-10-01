@@ -15,9 +15,12 @@
  */
 package framework.validation;
 
+import java.util.Collection;
+import java.util.Collections;
 import java.util.List;
 import java.util.Map;
 
+import com.google.common.collect.ImmutableList;
 import com.google.common.collect.Lists;
 import com.google.common.collect.Maps;
 
@@ -51,12 +54,26 @@ public class Errors {
         list.addAll(msg);
     }
 
-    public Map<String, List<String>> getMessages() {
+    public Map<String, List<String>> getMessagesMap() {
         return messages;
     }
 
+    public List<String> getMessages() {
+        // TODO cache this method
+        List<String> msgs = Lists.newArrayList();
+        Collection<List<String>> values = messages.values();
+        for (List<String> list : values) {
+            msgs.addAll(list);
+        }
+        return Collections.unmodifiableList(msgs);
+    }
+
     public List<String> getMessages(String field) {
-        return messages.get(field);
+        List<String> list = messages.get(field);
+        if (list == null) {
+            return ImmutableList.of();
+        }
+        return list;
     }
 
     @Override

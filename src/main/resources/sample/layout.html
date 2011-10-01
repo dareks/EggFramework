@@ -1,15 +1,11 @@
+<!-- This is a layout which will be used for templates in sample directory -->
 <html>
 	<head>
-		<style type="text/css">
-			body {
-				background-color: #eee;
-				padding: 10px;
-				border: black solid thin;
-			}
-		</style>
+		<link rel="stylesheet" href="<%= resource('style.css') %>" />
 	</head>
 	<body>
-		<b>Menu:</b> <%= link("index", "index") %> <%= link("viewHelpers", "viewHelpers") %> <br /><br />
+		<b>Menu:</b> <%= link("index", "index") %> | <%= link("text", "text") %> | <%= link("json", "json") %> | <%= link("partial", "partial") %> | <%= link("forwardTest", "forwardTest") %> | <%= link("redirectTest", "redirectTest") %> | <%= link("configTest", "configTest") %> | <%= link("viewHelpers", "viewHelpers") %> ||
+		<%= link("before", "securityTest", "before") %> || <%= link("ioc", "runService", "ioc") %> || <%= link("forms", "validatedForm", "validatedForm") %> <br /><br />
 		<!-- content is a special variable containing the template associated for given action, i.e. sample/index.html -->
 		<%= content %>		
 	</body>

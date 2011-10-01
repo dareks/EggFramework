@@ -29,6 +29,11 @@ public class Params {
         return request.getParameter(name);
     }
 
+    public String get(String name, String defaultValue) {
+        String value = request.getParameter(name);
+        return value == null ? defaultValue : value;
+    }
+
     public String[] getValues(String name) {
         return request.getParameterValues(name);
     }

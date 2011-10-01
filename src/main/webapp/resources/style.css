@@ -1,0 +1,38 @@
+body {
+	background-color: #fff;
+	color: black;
+}
+
+body,p,ol,ul,td {
+	font-family: consolas, monospace;
+	font-size: 13px;
+}
+
+a {
+	color: #69e;
+	font-weight: bold;
+}
+
+code {
+	background-color: black;
+	color: white;
+	padding: 10px;
+	display: block;
+	margin-bottom: 10px;
+	margin-top: 5px;
+}
+
+.example {
+	margin-bottom: 20px;
+	border: black dotted 1px;
+	padding: 10px;
+}
+
+label {
+	width: 150px;
+	display: inline-block;
+}
+
+input {
+	width: 200px;
+}
