@@ -16,7 +16,7 @@ Quick start
  * Install Maven plugin if needed (Netbeans and Intellij IDEA have Maven support out of the box) - for Eclipse use the update site of M2E plugin: http://download.eclipse.org/technology/m2e/releases
  * Download the source code of Egg Framework and extract somewhere
  * Import the project into your IDE - in Eclipse M2E use _File/Import/Existing Maven Projects_ and select the extracted directory
- * run the class _framework.Server_ located in _src/main/java_ - the embedded server will be started with sample code
+ * run the class _framework.Server_ located in _src/main/java_ - the embedded server with sample code will be started 
  * go to http://localhost:8080
  * check the source code in [src/main/java/controllers/SampleController.java](EggFramework/blob/master/src/main/java/controllers/SampleController.java) class
  
