@@ -79,6 +79,32 @@
 		    <version>1.6.2</version>
 		    <scope>provided</scope>
 		</dependency>
+		<!-- MongoDB - uncomment to have MongoDB and Morphia -->
+		<!--
+		<dependency>
+		        <groupId>org.mongodb</groupId>
+		        <artifactId>mongo-java-driver</artifactId>
+		        <version>2.6.5</version>
+		</dependency>
+		<dependency>
+		        <groupId>com.google.code.morphia</groupId>
+		        <artifactId>morphia</artifactId>
+		        <version>1.00-SNAPSHOT</version>
+		</dependency>
+		<dependency>
+		        <groupId>cglib</groupId>
+		        <artifactId>cglib-nodep</artifactId>
+		        <version>2.2</version>
+		</dependency>
+		<dependency>
+		        <groupId>proxytoys</groupId>
+		        <artifactId>proxytoys</artifactId>
+		        <version>1.0</version>
+		        <scope>system</scope>
+		        <systemPath>${project.basedir}/libs/proxytoys-1.0.jar</systemPath>
+		</dependency>
+		-->
+		<!-- End of MongoDB and Morphia -->
 	</dependencies>
 	<repositories>
 		<repository>
