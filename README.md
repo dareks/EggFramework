@@ -18,5 +18,5 @@ Quick start
  * Import the project into your IDE - in Eclipse M2E use _File/Import/Existing Maven Projects_ and select the extracted directory
  * run the class _framework.Server_ located in _src/main/java_ - the embedded server will be started with sample code
  * go to http://localhost:8080
- * check the source code in [src/main/java/controllers/SampleController.java](blob/master/src/main/java/controllers/SampleController.java) class
+ * check the source code in [src/main/java/controllers/SampleController.java](EggFramework/blob/master/src/main/java/controllers/SampleController.java) class
  
