@@ -9,31 +9,13 @@ Full stack web application framework with following features
  * Simple, yet powerful view layer leveraging Groovy programming language
  * Integration with MongoDB and Morphia - rapid development of database backed applications with scalablity in mind
  
-Sample code
+Quick start
 -----------
 
-src/main/java/controllers/PostsController.java:
-
-	public class PostsController {
-		// executed for url: /game/postDetails?id=12
-		// will render /game/postDetails.html
-		public void postDetails() {
-			int id = paramAsInt("id");
-			Post post = ....
-			attr("post", post);
-		}
-		
-		// executed by Flash player using AMF HTTP
-		// will returnJava String as an ActionScript String
-		public String flashAmfTest() {
-			return "Hello from server :)";
-		}
-	}
-
-src/main/resources/posts/postDetails.html:
-
-	<html>
-		<body>
- 			<%= post %>
-		</body>
-	</html>
+ * Download IDE - I recommend Eclipse IDE for Java EE Developers - http://eclipse.org
+ * Install Maven plugin if needed (Netbeans and Intellij IDEA have Maven support out of the box) - for Eclipse use the update site of M2E plugin: http://download.eclipse.org/technology/m2e/releases
+ * Download the source code of Egg Framework and extract somewhere
+ * Import the project into your IDE - in Eclipse M2E use File/Import/Existing Maven Projects and select the extracted directory
+ * run the class framework.Server - server will be started with sample code
+ * go to http://localhost:8080
+ * check the source code in src/main/java/controllers/SampleController.java class
