@@ -1,0 +1,64 @@
+<!-- TODO SIMPLIFY THIS EXAMPLE -->
+<html>
+<body>
+	<script type="text/javascript" src="<%= resource('jquery15.js') %>"></script>
+	<script type="text/javascript">
+		$(document).ready(function(){
+	
+			$("#messages").attr("scrollTop", $("#dialog").attr("scrollHeight"));
+			listen(new Date());
+			
+			$("#messageField").keydown(function(e) {
+				if ($("#messageField").val() != "") {
+					if(e.keyCode == 13) { 
+						send();
+					}
+				}
+			});
+			$("#submit").click(send);
+		});
+		
+		function send() {
+			$.ajax({
+				type: 'POST',
+				url: "<%= action('send') %>",
+				data: $("#messageForm").serialize()
+			});
+			$("#messageField").val("");
+		}
+	
+		function listen(date) {
+			$.ajax({
+				  type: 'GET',
+				  url: "<%= action('_listen') %>",
+				  data: { date: date },
+				  success: function(data) {
+					for (var i = 0; i < data.length; i++) {
+						$("#messages").append(new Date(data[i].date) + ": " + data[i].message).append("<br>");
+					}
+					$("#messages").css("bottom", 0);
+					$("#messages").attr("scrollTop", $("#dialog").attr("scrollHeight"));
+					if (data.length > 0) {
+						listen(data[data.length - 1].date);
+					} else {
+						listen(date);
+					}
+				  },
+				  error: function() {
+					  listen(date);
+				  },
+				  dataType: "json"
+				});
+		}
+	</script>
+	
+	Open this page in second window to see how this chat works.<br />
+	
+	<div id="messages">
+	</div>
+	
+	<form id="messageForm" action="#">
+		<input type="text" name="message" id="messageField" value="Write some message..." autofocus /> <input type="button" id="submit" value="SEND" />
+	</form>
+</body>
+</html>

@@ -10,6 +10,7 @@ public class Application {
     private final Logger logger = LoggerFactory.getLogger(Application.class);
     // Field containing reference to sampleService which can be used by controllers
     public SampleService sampleService;
+    public ChatService chatService;
 
     /**
      * Executed when application starts or just before first request is handled
@@ -19,6 +20,7 @@ public class Application {
 
         // IoC - create context by hand or use third party libraries (if you really need these)
         sampleService = new SampleService();
+        chatService = new ChatService();
 
         match("/index").rewrite("/sample/index"); // main page is /sample/index action
         match("/example/$action").rewrite("/sample/$action"); // all /example/* will be routed to /sample/*
