@@ -9,7 +9,8 @@ import java.util.List;
 import com.google.common.collect.Lists;
 
 /**
- * TODO Simplify this example
+ * TODO Simplify this example <br />
+ * TODO Limit number of messages held in memory
  */
 public class ChatService {
 
