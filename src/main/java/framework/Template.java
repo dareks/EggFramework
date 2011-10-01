@@ -26,7 +26,10 @@ import java.io.FileWriter;
 import java.io.IOException;
 import java.io.Writer;
 import java.util.Hashtable;
+import java.util.List;
 import java.util.Map;
+
+import org.apache.commons.io.IOUtils;
 
 import framework.GroovyRunner.GroovyClassLoaderRunner;
 import framework.GroovyRunner.GroovyScriptEngineRunner;
@@ -86,6 +89,7 @@ public class Template {
 
         final String name = file.getName();
         Long date = filemodificationDates.get(name);
+        // TODO Add checking if importers.groovy was modified - then flush all cache
         long lastModified = !productionMode ? file.lastModified() : -1; // omit lastModified() method call in production
                                                                         // mode (performance optimization)
         if (date == null || (!productionMode && date < lastModified)) {
@@ -101,11 +105,10 @@ public class Template {
     }
 
     private static void parse(File file, Writer writer) throws FileNotFoundException, IOException {
-        writer.append("import static framework.GlobalHelpers.*\n");
-        writer.append("import static view.Helpers.*\n");
-        writer.append("import entities.*\n");
-        writer.append("import java.io.*\n");
-        writer.append("import java.util.*\n");
+        List<String> imports = IOUtils.readLines(Template.class.getResourceAsStream("/imports.groovy"));
+        for (String line : imports) {
+            writer.append(line).append('\n');
+        }
         writer.append("framework.ThreadData data = framework.FrontController.threadData.get()\n");
         writer.append("Writer out = data.out\n");
         FileReader reader = new FileReader(file);

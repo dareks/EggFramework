@@ -27,7 +27,7 @@ First version of Egg Framework was developed by Jacek Olszak in 2008. At that ti
 developer was creating a Java classes which generates the HTML markup. 
 After one year of use the author realized that it is not the proper way - mainly because of the performance problems (slow response time), high memory consumption (whole html tree held in memory) and heavy
 use of session (the generated pages were saved into session). So he created a second version of 
-Egg Framework with template engine based on Groovy and decided to write also the simple yet powerful controller layer. He was really impressed by other frameworks available like Ruby on Rails or Grails but 
+Egg Framework with template engine based on Groovy and decided also to write the simple yet powerful controller layer. He was really impressed by other frameworks available like Ruby on Rails or Grails but 
 they were too slow to meet his needs (mostly because of the programming languages used by them). 
-He wanted to have a very simple and high performant Java framework which can be used for rapid web application development. Now the new Egg Framework is almost ready and can be used for standard websites, 
+He wanted to have a very simple and high performant framework for Java language (which is fast enough) which can be used for rapid web application development. Now the new Egg Framework is almost ready and can be used for standard websites, 
 AJAX applications and even games development (which in fact is the most important for the author :).
