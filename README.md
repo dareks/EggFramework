@@ -9,6 +9,7 @@ Web application framework with following features
  * Simple, yet powerful view layer leveraging Groovy programming language
  * Ready for creating REST and Flash remoting (AMF) actions
  * Create asynchronous actions for functionalities like chats, news live feeds or web browser games
+ * Use your normal tools, libraries and frameworks which you like - Maven, Guava, slf4j etc.
 
 Quick start
 -----------
