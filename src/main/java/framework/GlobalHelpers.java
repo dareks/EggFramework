@@ -38,8 +38,6 @@ import javax.servlet.http.Cookie;
 import org.apache.commons.beanutils.BeanUtils;
 import org.codehaus.jackson.map.ObjectMapper;
 
-import com.google.code.morphia.utils.ReflectionUtils;
-import com.google.common.collect.Iterables;
 import com.google.common.collect.Lists;
 import com.google.common.collect.Maps;
 
@@ -658,29 +656,30 @@ public class GlobalHelpers {
         return map;
     }
 
-    /**
-     * VERY EXPERIMENTAL FEATURE. Generate piece of code depdening on passed object. It can generate ready to use HTML
-     * code for tables, forms, combo boxes etc.
-     */
-    public static void scaffold(String name, Object o) throws IOException, IllegalArgumentException, IllegalAccessException {
-        Writer out = out();
-
-        String type = null;
-        Field[] fields = null;
-        if (o instanceof Iterable) {
-            Iterable iterable = (Iterable) o;
-            Object first = Iterables.getFirst(iterable, null);
-            fields = ReflectionUtils.getDeclaredAndInheritedFields(first.getClass(), true);
-            type = "table";
-        } else if (o instanceof Class) {
-            fields = ReflectionUtils.getDeclaredAndInheritedFields((Class) o, true);
-            type = "form";
-        } else {
-            fields = ReflectionUtils.getDeclaredAndInheritedFields(o.getClass(), true);
-            type = "view";
-        }
-        out.append(parse("/_scaffold", map("type", type, "name", name, "fields", fields, "object", o)));
-    }
+    // /**
+    // * VERY EXPERIMENTAL FEATURE. Generate piece of code depdening on passed object. It can generate ready to use HTML
+    // * code for tables, forms, combo boxes etc.
+    // */
+    // public static void scaffold(String name, Object o) throws IOException, IllegalArgumentException,
+    // IllegalAccessException {
+    // Writer out = out();
+    //
+    // String type = null;
+    // Field[] fields = null;
+    // if (o instanceof Iterable) {
+    // Iterable iterable = (Iterable) o;
+    // Object first = Iterables.getFirst(iterable, null);
+    // fields = ReflectionUtils.getDeclaredAndInheritedFields(first.getClass(), true);
+    // type = "table";
+    // } else if (o instanceof Class) {
+    // fields = ReflectionUtils.getDeclaredAndInheritedFields((Class) o, true);
+    // type = "form";
+    // } else {
+    // fields = ReflectionUtils.getDeclaredAndInheritedFields(o.getClass(), true);
+    // type = "view";
+    // }
+    // out.append(parse("/_scaffold", map("type", type, "name", name, "fields", fields, "object", o)));
+    // }
 
     public static AsyncForward asyncForward() {
         AsyncContext ctx = req().startAsync();

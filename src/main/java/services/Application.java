@@ -8,7 +8,7 @@ import org.slf4j.LoggerFactory;
 public class Application {
 
     private final Logger logger = LoggerFactory.getLogger(Application.class);
-    // Field containing reference to sample service
+    // Field containing reference to sampleService which can be used by controllers
     public SampleService sampleService;
 
     /**
