@@ -30,7 +30,8 @@ import com.google.common.collect.Maps;
  *  /$controller/$action/$id <br>
  *  /$controller/$action <br>
  * </code> <br>
- * Parameter names are starting with dollar '$' sign and can contain any character. The exceptions are following characters: '/' (slash), ' ' (space), '.' (dot) and '-' (dash). Examples:<br>
+ * Parameter names are starting with dollar '$' sign and can contain any character. The exceptions are following
+ * characters: '/' (slash), ' ' (space), '.' (dot) and '-' (dash). Examples:<br>
  * <code>
  *  /articles/$id-$category/$region  gives the following parts: '/articles/' literal, 'id' parameter, '-' literal, 'category' parameter, '/' literal, 'region' parameter
  * </code>

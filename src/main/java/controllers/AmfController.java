@@ -17,7 +17,8 @@ public class AmfController {
      * </code>
      */
     public String hello() {
-        return "Hello from server :)"; // will return the string to the Flash client
+        return "Hello from server :)"; // will return the string to the Flash
+                                       // client
     }
 
     /**

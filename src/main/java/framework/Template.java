@@ -86,7 +86,8 @@ public class Template {
 
         final String name = file.getName();
         Long date = filemodificationDates.get(name);
-        long lastModified = !productionMode ? file.lastModified() : -1; // omit lastModified() method call in production mode (performance optimization)
+        long lastModified = !productionMode ? file.lastModified() : -1; // omit lastModified() method call in production
+                                                                        // mode (performance optimization)
         if (date == null || (!productionMode && date < lastModified)) {
             FileWriter generatedSourceWriter = new FileWriter(groovySourceFile);
             try {

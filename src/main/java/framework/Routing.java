@@ -25,7 +25,8 @@ import com.google.common.collect.Lists;
 import framework.Rule.Pattern;
 
 /**
- * Routing class responsible for matching servlet paths to patterns. It is pretty fast - for 20 routes it takes 0,15ms on Intel i5 2500k
+ * Routing class responsible for matching servlet paths to patterns. It is pretty fast - for 20 routes it takes 0,15ms
+ * on Intel i5 2500k
  * 
  * @author Jacek Olszak
  * 

@@ -7,8 +7,9 @@ import framework.Response;
 public class IocController {
 
     /**
-     * Egg Framework autimatically injects Application instance into every controller with "app" field (autowire by name) Only this one instance can be injected into controllers. You cannot inject
-     * particular services into controller. Use fields or getters in Application instance returning services references.
+     * Egg Framework autimatically injects Application instance into every controller with "app" field (autowire by
+     * name) Only this one instance can be injected into controllers. You cannot inject particular services into
+     * controller. Use fields or getters in Application instance returning services references.
      */
     private Application app;
 

@@ -23,7 +23,8 @@ public class AuthController {
                 return redirect().action("sample", "index");
             }
         } else {
-            flash("error", "Wrong credentials"); // flash is a special attributes scope (persisted in session for the next request only)
+            flash("error", "Wrong credentials"); // flash is a special attributes scope (persisted in session for the
+                                                 // next request only)
             return render("login");
         }
     }

@@ -20,8 +20,9 @@ import flex.messaging.io.amf.Java15AmfMessageSerializer;
 import flex.messaging.io.amf.MessageBody;
 
 /**
- * Gateway is a place where Flash client connects and sends messages. Every Flash remoting action is executed through this gateway. This class can be compared to FrontController but it adds the
- * functionality of handling many incoming messages in a single HTTP request
+ * Gateway is a place where Flash client connects and sends messages. Every Flash remoting action is executed through
+ * this gateway. This class can be compared to FrontController but it adds the functionality of handling many incoming
+ * messages in a single HTTP request
  */
 public class AMFGateway extends HttpServlet {
 

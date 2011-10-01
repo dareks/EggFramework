@@ -24,8 +24,8 @@ import org.apache.commons.jci.stores.ResourceStore;
 import org.apache.commons.jci.stores.ResourceStoreClassLoader;
 
 /**
- * The ReloadingClassLoader uses a delegation mechansim to allow classes to be reloaded. That means that loadClass calls may return different results if the class was change in the underlying
- * ResoruceStore.
+ * The ReloadingClassLoader uses a delegation mechansim to allow classes to be reloaded. That means that loadClass calls
+ * may return different results if the class was change in the underlying ResoruceStore.
  * 
  * @author tcurdt
  */

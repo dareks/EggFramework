@@ -12,7 +12,8 @@ public class FormsController {
 
     static {
         // validation rules specified in CreateUserForm class will be used for action createUser
-        validateParams("createUser", CreateUserForm.class).input("validatedForm"); // if validation error occurs go back to validatedForm action
+        validateParams("createUser", CreateUserForm.class).input("validatedForm"); // if validation error occurs go back
+                                                                                   // to validatedForm action
     }
 
     /**
@@ -38,7 +39,8 @@ public class FormsController {
     public static class CreateUserForm {
 
         static {
-            required("name", "street"); // name and street parameters are required which means that they shouldn't be null or empty
+            required("name", "street"); // name and street parameters are required which means that they shouldn't be
+                                        // null or empty
             registerValidator("postalCode", new PostalCodeValidator()); // for postalCode parameter use custom validator
         }
 
@@ -56,7 +58,8 @@ public class FormsController {
     public static class PostalCodeValidator implements Validator {
 
         public void validates(String field, Object value, Errors errors) {
-            if (value != null && !String.valueOf(value).trim().isEmpty()) { // validate only if parameter is given and is not empty
+            if (value != null && !String.valueOf(value).trim().isEmpty()) { // validate only if parameter is given and
+                                                                            // is not empty
                 String val = value.toString();
                 if (!val.matches("\\d\\d-\\d\\d\\d")) {
                     errors.add(field, field + " has wrong format"); // add error message for field

@@ -16,7 +16,8 @@
 package framework;
 
 /**
- * Run this class in order to run a web server with your application. To enable automatic reloading use JRebel ( {@link http ://www.zeroturnaround.com/jrebel/} )
+ * Run this class in order to run a web server with your application. To enable automatic reloading use JRebel (
+ * {@link http ://www.zeroturnaround.com/jrebel/} )
  * 
  * @author Jacek Olszak
  */

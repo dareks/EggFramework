@@ -8,17 +8,20 @@ import java.util.Map;
 import framework.Response;
 
 /**
- * Shows basic usage of Egg Framework. Controller is a class containing a list of action methods. Every action is reponsible for handling one type of HTTP request. Egg Framework is using Convention
- * over Configuration, which means that the amount of configuration is very limited and conventions are used to configure the application automatically. For instance every action defined in controller
- * class is accessible from following url: http://localhost:8080/$controllerClassNameWithoutControllerSuffix/$action
+ * Shows basic usage of Egg Framework. Controller is a class containing a list of action methods. Every action is
+ * reponsible for handling one type of HTTP request. Egg Framework is using Convention over Configuration, which means
+ * that the amount of configuration is very limited and conventions are used to configure the application automatically.
+ * For instance every action defined in controller class is accessible from following url:
+ * http://localhost:8080/$controllerClassNameWithoutControllerSuffix/$action
  */
 public class SampleController {
 
     /**
      * Go to http://localhost:8080/sample/index.html to see this page. <br />
      * <br />
-     * This action automatically render sample/index.html Groovy template. To change the template edit the src/main/resources/sample/index.html file. To change the layout edit the
-     * src/main/resources/sample/layout.html file.
+     * This action automatically render sample/index.html Groovy template. To change the template edit the
+     * src/main/resources/sample/index.html file. To change the layout edit the src/main/resources/sample/layout.html
+     * file.
      */
     public void index() {
         attr("name", "Egg Framework"); // sets an attribute named "name"
@@ -77,7 +80,8 @@ public class SampleController {
     }
 
     /**
-     * Go to http://localhost:8080/sample/configTest.html to see this page. You can access config.properties from every possible place (controllers, view, services etc.).
+     * Go to http://localhost:8080/sample/configTest.html to see this page. You can access config.properties from every
+     * possible place (controllers, view, services etc.).
      */
     public Response configTest() {
         return renderText(f("The application is in %s mode", config("mode")));
