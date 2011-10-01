@@ -4,10 +4,10 @@ Egg Framework
 Web application framework with following features
 
  * Super fast and scalable (written in Java for Java developers)
- * Allows to develop quickly (design influenced by Ruby on Rails) - CoC, DRY, ultra fast prototyping
+ * Allows to develop quickly (design and some solutions influenced by Ruby on Rails) - CoC, DRY, ultra fast prototyping
  * MVC pattern applied
  * Simple, yet powerful view layer leveraging Groovy programming language
- * Ready for creating REST and Flash AMF actions
+ * Ready for creating REST and Flash remoting (AMF) actions
  
 Quick start
 -----------
