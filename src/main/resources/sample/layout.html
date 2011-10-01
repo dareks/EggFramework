@@ -4,9 +4,33 @@
 		<link rel="stylesheet" href="<%= resource('style.css') %>" />
 	</head>
 	<body>
-		<b>Menu:</b> <%= link("index", "Index") %> | <%= link("text", "Render text") %> | <%= link("json", "Render JSON") %> | <%= link("partial", "Partial") %> | <%= link("forwardTest", "Forward") %> | <%= link("redirectTest", "Redirect") %> | <%= link("configTest", "Configuration") %> | <%= link("viewHelpers", "View helpers") %> ||
-		<%= link("before", "securityTest", "Before interceptor") %> || <%= link("ioc", "runService", "Inversion of Control") %> || <%= link("forms", "validatedForm", "Validated form") %> || <%= link("amf", "client", "Flash AMF") %> <br /><br />
+		<b>Menu:</b> <%= link("index", "Index") %> | <%= link("text", "Render text") %> | <%= link("json", "Render JSON") %> | 
+		<%= link("partial", "Partial") %> | <%= link("forwardTest", "Forward") %> | <%= link("redirectTest", "Redirect") %> | 
+		<%= link("configTest", "Configuration") %> | <%= link("viewHelpers", "View helpers") %> ||
+		<%= link("before", "securityTest", "Before interceptor") %> || <%= link("ioc", "runService", "Inversion of Control") %> || 
+		<%= link("forms", "validatedForm", "Validated form") %> || <%= link("amf", "client", "Flash AMF") %> <br /><br />
+		
+		
 		<!-- content is a special variable containing the template associated for given action, i.e. sample/index.html -->
 		<%= content %>		
+		
+		
+		<br /><br />
+		
+		<h3>Project structure:</h3>
+		<ul>
+			<li><i>src/main/java</i> - Java source code
+				<ul>
+					<li><i>controllers</i> - application controllers - write your actions here</li>
+					<li><i>framework</i> - framework classes - do not change that unless you really need that</li>
+					<li><i>services</i> - application services - write reusable code for controllers here</li>
+					<li><i>view</i> - classes used mainly by view - like Helpers - write reusable code for view and controllers here</li>
+				</ul>
+			</li>
+			<li><i>src/main/resources</i> - Groovy templates and other hidden from outside world resources. Every template is placed inside the directory with the name of controller</li>
+			<li><i>src/main/webapp/resources</i> - static resources available directly from the browser (publicly available)</li>
+			<li><i>src/main/webapp/WEB-INF</i> - directory with configuration</li>
+		</ul>
+		
 	</body>
 </html>
