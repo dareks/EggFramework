@@ -65,6 +65,7 @@ public class FrontController {
             if (errors == null) {
                 errors = new Errors();
             }
+            data.setErrors(errors);
             data.request.set("errors", errors);
             data.request.set("params", data.params);
             data.request.set("messages", new ArrayList<String>());

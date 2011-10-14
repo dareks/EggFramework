@@ -31,6 +31,7 @@ public class FrameworkServlet extends HttpServlet {
 
     static final Routing ROUTING = new Routing();
     static Object application;
+    static ServletContext SERVLET_CONTEXT;
     boolean started;
 
     private void createAndStartApplication() throws ServletException, ClassNotFoundException, InstantiationException, IllegalAccessException, InvocationTargetException, NoSuchMethodException {
@@ -40,6 +41,7 @@ public class FrameworkServlet extends HttpServlet {
         ROUTING.addRule(new Rule("/$controller/$action/$id"));
         ROUTING.addRule(new Rule("/$controller/$action"));
         ROUTING.close();
+        SERVLET_CONTEXT = getServletContext();
         started = true;
     }
 

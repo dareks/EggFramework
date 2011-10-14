@@ -247,6 +247,10 @@ public class GlobalHelpers {
         FrontController.threadData.get().getOut().write(f(f, args));
     }
 
+    public static Errors errors() {
+        return FrontController.threadData.get().getErrors();
+    }
+
     public static Params params() {
         return FrontController.threadData.get().params;
     }
@@ -382,7 +386,7 @@ public class GlobalHelpers {
     }
 
     public static Errors validate(String fieldName, Object fieldValue, Validator... validators) {
-        Errors errors = new Errors();
+        Errors errors = errors();
         if (validators != null) {
             for (Validator validator : validators) {
                 validator.validates(fieldName, fieldValue, errors);

@@ -25,6 +25,8 @@ import java.io.FileReader;
 import java.io.FileWriter;
 import java.io.IOException;
 import java.io.Writer;
+import java.net.URISyntaxException;
+import java.net.URL;
 import java.util.Hashtable;
 import java.util.List;
 import java.util.Map;
@@ -58,7 +60,7 @@ public class Template {
     }
 
     public static boolean exists(String template) {
-        return new File("target/classes/" + template + ".html").exists();
+        return Template.class.getResource(template + ".html") != null;
     }
 
     public static void render(String template, Map<String, Object> model, Writer writer) throws Exception {
@@ -80,18 +82,24 @@ public class Template {
         Loggers.BENCHMARK.info("Template {} rendering time is {} us", template, (System.nanoTime() - started) / 1000);
     }
 
-    private static String generateSourceFile(String template) throws IOException, FileNotFoundException {
+    private static String generateSourceFile(String template) throws IOException, FileNotFoundException, URISyntaxException {
         String groovySourceFile = "target/generated/" + template + ".groovy";
-        File file = new File("target/classes/" + template + ".html");
-        if (!file.exists()) {
+        if (!template.startsWith("/")) { // use indexOf instead
+            template = "/" + template;
+        }
+        URL url = Template.class.getResource(template + ".html");
+        if (url == null) {
             throw new FileNotFoundException("Template " + template + ".html does not exist");
         }
 
-        final String name = file.getName();
+        final String name = url.getFile();
         Long date = filemodificationDates.get(name);
         // TODO Add checking if importers.groovy was modified - then flush all cache
-        long lastModified = !productionMode ? file.lastModified() : -1; // omit lastModified() method call in production
-                                                                        // mode (performance optimization)
+        File file = new File(url.toURI());
+        long lastModified = !productionMode ? file.lastModified() : -1; // omit lastModified() method
+                                                                        // call in
+        // production
+        // mode (performance optimization)
         if (date == null || (!productionMode && date < lastModified)) {
             FileWriter generatedSourceWriter = new FileWriter(groovySourceFile);
             try {

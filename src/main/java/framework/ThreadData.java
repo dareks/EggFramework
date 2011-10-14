@@ -21,6 +21,8 @@ import java.io.Writer;
 import javax.servlet.http.HttpServletRequest;
 import javax.servlet.http.HttpServletResponse;
 
+import framework.validation.Errors;
+
 // TODO Add support for getting HTTP headers
 public class ThreadData {
 
@@ -31,6 +33,7 @@ public class ThreadData {
     public final Cookies cookies = new Cookies();
     public HttpServletResponse resp;
     private Writer out;
+    private Errors errors;
 
     public ThreadData(Request request, HttpServletResponse servletResponse) {
         this.request = request;
@@ -40,6 +43,15 @@ public class ThreadData {
         cookies.response = servletResponse;
         session.request = servletRequest;
         this.resp = servletResponse;
+        this.errors = new Errors();
+    }
+
+    public Errors getErrors() {
+        return errors;
+    }
+
+    public void setErrors(Errors errors) {
+        this.errors = errors;
     }
 
     public void setOut(Writer out) {

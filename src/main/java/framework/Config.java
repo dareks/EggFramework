@@ -23,7 +23,7 @@ import java.util.Properties;
 
 public class Config {
 
-    private static final String FILENAME = "src/main/webapp/WEB-INF/config.properties";
+    private static final String FILENAME = "WEB-INF/config.properties";
     private static Properties properties;
     private static volatile long lastChecked;
     private static volatile long lastModified;
@@ -37,17 +37,21 @@ public class Config {
         if (System.currentTimeMillis() - lastChecked > 1000) {
             lastChecked = System.currentTimeMillis();
             synchronized (Config.class) {
-                if (new File(FILENAME).lastModified() != lastModified) {
+                if (getFile().lastModified() != lastModified) {
                     load();
                 }
             }
         }
     }
 
+    private static File getFile() {
+        return new File(FrameworkServlet.SERVLET_CONTEXT.getRealPath(FILENAME));
+    }
+
     private static void load() {
         properties = new Properties();
         try {
-            File file = new File(FILENAME);
+            File file = getFile();
             lastModified = file.lastModified();
             FileReader fileReader = new FileReader(file);
             properties.load(fileReader);

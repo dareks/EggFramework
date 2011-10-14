@@ -36,7 +36,7 @@ public class ObjectValidationConfig {
 
     public Errors validate(Object object) {
         // TODO Add nested validation
-        Errors errors = new Errors();
+        Errors errors = errors();
         Set<Entry<String, List<Validator>>> entrySet = validators.entrySet();
         for (Entry<String, List<Validator>> entry : entrySet) {
             List<Validator> fieldValidators = entry.getValue();
@@ -64,7 +64,7 @@ public class ObjectValidationConfig {
             mapToValidate.put(entry.getKey(), value);
         }
         // TODO Add nested validation
-        Errors errors = new Errors();
+        Errors errors = errors();
         Set<Entry<String, List<Validator>>> entrySet = validators.entrySet();
         for (Entry<String, List<Validator>> entry : entrySet) {
             List<Validator> fieldValidators = entry.getValue();
