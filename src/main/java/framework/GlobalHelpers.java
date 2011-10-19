@@ -361,6 +361,10 @@ public class GlobalHelpers {
         }
     }
 
+    public static Validator length(String field, int min, int max) {
+        return registerValidator(field, lengthValidator(min, max));
+    }
+
     public static DecimalNumberValidator decimalNumber(String field) {
         return registerValidator(field, new DecimalNumberValidator());
     }
@@ -420,6 +424,10 @@ public class GlobalHelpers {
         }
     };
 
+    public static final Validator lengthValidator(int min, int max) {
+        return new LengthValidator(min, max);
+    }
+
     public static final <T> EnumValidator<T> enumValidator(T... values) {
         return new EnumValidator<T>(values);
     }
@@ -444,6 +452,26 @@ public class GlobalHelpers {
 
         }
 
+    }
+
+    public static class LengthValidator implements Validator {
+
+        private int min;
+        private int max;
+
+        public LengthValidator(int min, int max) {
+            this.min = min;
+            this.max = max;
+        }
+
+        public void validates(String field, Object value, Errors errors) {
+            if (min > 0) {
+                String str = String.valueOf(value);
+                if (value == null || str.length() < min || str.length() > max) {
+                    errors.add(field, field + f(" has invalid length. Should be %d-%d", min, max));
+                }
+            }
+        }
     }
 
     // end of validation

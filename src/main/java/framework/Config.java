@@ -23,12 +23,18 @@ import java.util.Properties;
 
 public class Config {
 
-    private static final String FILENAME = "WEB-INF/config.properties";
+    private static final String FILENAME_PREFIX = "WEB-INF/config";
+    private static String filename;
     private static Properties properties;
     private static volatile long lastChecked;
     private static volatile long lastModified;
 
     static {
+        String mode = System.getProperty("mode");
+        if (mode == null) {
+            mode = "development";
+        }
+        filename = FILENAME_PREFIX + "_" + mode + ".properties";
         load();
     }
 
@@ -45,7 +51,7 @@ public class Config {
     }
 
     private static File getFile() {
-        return new File(FrameworkServlet.SERVLET_CONTEXT.getRealPath(FILENAME));
+        return new File(FrameworkServlet.SERVLET_CONTEXT.getRealPath(filename));
     }
 
     private static void load() {
@@ -69,6 +75,9 @@ public class Config {
     public static String get(String key, String defaultValue) {
         checkModifications();
         Object value = properties.get(key);
+        if (value == null) {
+            value = System.getProperty(key);
+        }
         return value != null ? processPlaceholders(String.valueOf(value)) : defaultValue;
     }
 

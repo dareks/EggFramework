@@ -25,6 +25,7 @@ public class Server {
 
     public static void main(String[] args) throws InterruptedException {
         ForkedJettyServer server = new ForkedJettyServer();
+        System.setProperty("mode", "development");
         server.start();
     }
 }
