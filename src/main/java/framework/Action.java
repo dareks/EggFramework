@@ -51,7 +51,7 @@ public class Action {
         this(action, controller, null, null, -1);
     }
 
-    public synchronized Response execute(ThreadData data) throws InstantiationException, IllegalAccessException, IllegalArgumentException, InvocationTargetException {
+    public Response execute(ThreadData data) throws InstantiationException, IllegalAccessException, IllegalArgumentException, InvocationTargetException {
         if (method == null) {
             return null;
         }

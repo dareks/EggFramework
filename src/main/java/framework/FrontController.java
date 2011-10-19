@@ -51,7 +51,10 @@ public class FrontController {
             }
         }
 
+        long before = System.nanoTime();
         Request request = routing.route(path, req);
+        long diff = System.nanoTime() - before;
+        Loggers.BENCHMARK.info(f("Routing time: %d us", diff / 1000));
         if (request == null) {
             res.sendError(404);
             return;

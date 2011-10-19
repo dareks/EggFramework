@@ -25,6 +25,8 @@ import javax.servlet.http.HttpServlet;
 import javax.servlet.http.HttpServletRequest;
 import javax.servlet.http.HttpServletResponse;
 
+import com.esotericsoftware.reflectasm.MethodAccess;
+
 public class FrameworkServlet extends HttpServlet {
 
     private static final long serialVersionUID = 1L;
@@ -33,6 +35,14 @@ public class FrameworkServlet extends HttpServlet {
     static Object application;
     static ServletContext SERVLET_CONTEXT;
     boolean started;
+
+    static String FRONT_CONTROLLER_CLASS_NAME = "framework.FrontController";
+    static String FRONT_CONTROLLER_METHOD_NAME = "service";
+
+    // just for production fields:
+    private Object frontController;
+    private MethodAccess methodAccess;
+    private int methodIndex;
 
     private void createAndStartApplication() throws ServletException, ClassNotFoundException, InstantiationException, IllegalAccessException, InvocationTargetException, NoSuchMethodException {
         Class<?> appClass = Thread.currentThread().getContextClassLoader().loadClass("services.Application");
@@ -43,6 +53,13 @@ public class FrameworkServlet extends HttpServlet {
         ROUTING.close();
         SERVLET_CONTEXT = getServletContext();
         started = true;
+
+        if (Config.isInProductionMode()) {
+            Class<?> controllerClass = Thread.currentThread().getContextClassLoader().loadClass(FRONT_CONTROLLER_CLASS_NAME);
+            methodAccess = MethodAccess.get(controllerClass);
+            methodIndex = methodAccess.getIndex(FRONT_CONTROLLER_METHOD_NAME, HttpServletRequest.class, HttpServletResponse.class, ServletContext.class, Routing.class);
+            frontController = createFrontController();
+        }
     }
 
     @Override
@@ -56,7 +73,7 @@ public class FrameworkServlet extends HttpServlet {
 
     @Override
     protected void service(HttpServletRequest req, HttpServletResponse resp) throws ServletException, IOException {
-        synchronized (this) { // bottleneck?
+        synchronized (this) {
             if (!started) {
                 try {
                     createAndStartApplication();
@@ -66,10 +83,8 @@ public class FrameworkServlet extends HttpServlet {
             }
         }
         try {
-            // TODO Controller should be created only once for whole application
-            Class<?> controllerClass = Thread.currentThread().getContextClassLoader().loadClass("framework.FrontController");
-            Object controller = controllerClass.newInstance();
-            invoke("service", controller, req, resp, getServletContext(), ROUTING);
+            Object controller = getFrontController();
+            invoke(FRONT_CONTROLLER_METHOD_NAME, controller, req, resp, getServletContext(), ROUTING);
         } catch (Exception e) {
             // TODO WTF?
             Throwable cause = e;
@@ -87,10 +102,24 @@ public class FrameworkServlet extends HttpServlet {
         }
     }
 
+    private Object getFrontController() throws ClassNotFoundException, InstantiationException, IllegalAccessException {
+        return Config.isInProductionMode() ? frontController : createFrontController();
+    }
+
+    private Object createFrontController() throws ClassNotFoundException, InstantiationException, IllegalAccessException {
+        Class<?> controllerClass = Thread.currentThread().getContextClassLoader().loadClass(FRONT_CONTROLLER_CLASS_NAME);
+        Object controller = controllerClass.newInstance();
+        return controller;
+    }
+
     private void invoke(String methodName, Object controller, HttpServletRequest req, HttpServletResponse resp, ServletContext ctx, Routing routing) throws SecurityException, NoSuchMethodException,
             IllegalArgumentException, IllegalAccessException, InvocationTargetException {
-        Method method = controller.getClass().getMethod(methodName, HttpServletRequest.class, HttpServletResponse.class, ServletContext.class, Routing.class);
-        method.invoke(controller, req, resp, ctx, routing);
+        if (Config.isInProductionMode()) {
+            methodAccess.invoke(controller, methodIndex, req, resp, ctx, routing);
+        } else {
+            Method method = controller.getClass().getMethod(methodName, HttpServletRequest.class, HttpServletResponse.class, ServletContext.class, Routing.class);
+            method.invoke(controller, req, resp, ctx, routing);
+        }
     }
 
 }
