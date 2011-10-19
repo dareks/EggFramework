@@ -29,21 +29,25 @@ public class Config {
     private static volatile long lastChecked;
     private static volatile long lastModified;
 
+    private static volatile boolean inProductionMode;
+
     public static final String MODE = "mode";
     public static final String PRODUCTION_MODE = "production";
+    public static final String DEVELOPMENT_MODE = "development";
 
     static {
         String mode = System.getProperty(MODE);
         if (mode == null) {
-            mode = "development";
+            mode = DEVELOPMENT_MODE;
         }
         filename = FILENAME_PREFIX + "_" + mode + ".properties";
         load();
+        inProductionMode = PRODUCTION_MODE.equalsIgnoreCase(mode);
     }
 
     private static void checkModifications() {
         // check for modification after 1 second
-        if (System.currentTimeMillis() - lastChecked > 1000) {
+        if (System.currentTimeMillis() - lastChecked > 1000) { // TODO interval should be customizable
             lastChecked = System.currentTimeMillis();
             synchronized (Config.class) {
                 if (getFile().lastModified() != lastModified) {
@@ -100,7 +104,7 @@ public class Config {
     }
 
     public static boolean isInProductionMode() {
-        return PRODUCTION_MODE.equalsIgnoreCase(get(Config.MODE));
+        return inProductionMode;
     }
 
 }

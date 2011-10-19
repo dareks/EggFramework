@@ -17,38 +17,58 @@ package framework;
 
 import static framework.GlobalHelpers.*;
 
-import java.lang.reflect.Field;
 import java.lang.reflect.InvocationTargetException;
 import java.lang.reflect.Method;
+
+import com.esotericsoftware.reflectasm.MethodAccess;
 
 public class Action {
 
     public final String action;
-    public final Class<?> clazz;
+    public final Object controller;
     public final Method method;
+    public final MethodAccess methodAccess;
+    public final int methodIndex;
 
-    public Action(String action, Class<?> clazz, Method method) {
+    public final boolean hasParameters;
+
+    public Action(String action, Object controller, Method method, MethodAccess methodAccess, int methodIndex) {
         super();
         this.action = action;
-        this.clazz = clazz;
+        this.controller = controller;
         this.method = method;
+        this.methodAccess = methodAccess;
+        this.methodIndex = methodIndex;
+
+        hasParameters = method != null ? method.getParameterTypes().length != 0 : false;
+    }
+
+    public Action(String action, Object controller, Method method) {
+        this(action, controller, method, null, -1);
+    }
+
+    public Action(String action, Object controller) {
+        this(action, controller, null, null, -1);
     }
 
     public synchronized Response execute(ThreadData data) throws InstantiationException, IllegalAccessException, IllegalArgumentException, InvocationTargetException {
-        Object controller = clazz.newInstance();
-        // IoC by name
-        // TODO what about IoC by type?
-        Field field = findInheritedField(controller.getClass(), "app");
-        if (field != null) {
-            field.setAccessible(true);
-            field.set(controller, FrameworkServlet.application);
+        if (method == null) {
+            return null;
         }
         Object response = null;
-        if (method.getParameterTypes().length == 0) {
-            response = method.invoke(controller);
+        if (!hasParameters) {
+            if (methodAccess == null) {
+                response = method.invoke(controller);
+            } else {
+                response = methodAccess.invoke(controller, methodIndex);
+            }
         } else {
             Object[] actionData = data.request.get(ACTION_DATA);
-            response = method.invoke(controller, actionData);
+            if (methodAccess == null) {
+                response = method.invoke(controller, actionData);
+            } else {
+                response = methodAccess.invoke(controller, methodIndex, actionData);
+            }
             // TODO ADD FEATURE TO AUTOMATICALLY PASS HTTP PARAMETERS AS BEAN
         }
         if (response instanceof Response) {

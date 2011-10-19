@@ -15,8 +15,6 @@
  */
 package framework;
 
-import java.io.File;
-import java.io.FilenameFilter;
 import java.io.IOException;
 import java.io.StringWriter;
 import java.io.Writer;
@@ -31,6 +29,7 @@ import java.util.List;
 import java.util.Map;
 import java.util.Map.Entry;
 import java.util.Set;
+import java.util.concurrent.ConcurrentHashMap;
 
 import javax.servlet.AsyncContext;
 import javax.servlet.http.Cookie;
@@ -38,6 +37,7 @@ import javax.servlet.http.Cookie;
 import org.apache.commons.beanutils.BeanUtils;
 import org.codehaus.jackson.map.ObjectMapper;
 
+import com.esotericsoftware.reflectasm.MethodAccess;
 import com.google.common.collect.Lists;
 import com.google.common.collect.Maps;
 
@@ -531,45 +531,94 @@ public class GlobalHelpers {
         }
     }
 
-    public static Action findAction(String className, String action) {
+    private static final ActionsCache actionsCache = new ActionsCache();
+
+    private static Action findActionOnProduction(String className, String action) {
+        // use reflectasm for fast relection
         try {
-            Class<?> clazz = Thread.currentThread().getContextClassLoader().loadClass(className);
-            Method[] methods = clazz.getMethods();
-            Method actionMethod = null;
-            for (Method method : methods) {
-                if (method.getName().equals(action)) {
-                    actionMethod = method;
-                }
-            }
-            if (actionMethod != null) {
-                Action instance = new Action(action, clazz, actionMethod);
-                return instance;
+            Action cached = actionsCache.get(className, action);
+            if (cached != null) {
+                return cached;
             } else {
-                return null;
+                Class<?> clazz = Thread.currentThread().getContextClassLoader().loadClass(className);
+                MethodAccess access = MethodAccess.get(clazz);
+                int index = access.getIndex(action);
+                Method actionMethod = clazz.getDeclaredMethods()[index];
+                Action instance = new Action(action, getControllerInstance(clazz), actionMethod, access, index);
+                actionsCache.put(className, action, instance);
+                return instance;
             }
+        } catch (IllegalArgumentException e) {
+            actionsCache.put(className, action, new Action(className, action));
+            return null;
         } catch (ClassNotFoundException e) {
+            actionsCache.put(className, action, new Action(className, action));
             return null;
         } catch (Exception e) {
             throw new RuntimeException(e.getMessage(), e);
         }
     }
 
-    public static Class<?>[] findClassesInPackage(String name) throws ClassNotFoundException {
-        String classesDir = "target/classes/";
-        File dir = new File(classesDir, name.replace('.', '/'));
-        File[] files = dir.listFiles(new FilenameFilter() {
-            public boolean accept(File dir, String name) {
-                return name.endsWith(".class");
+    private static final ConcurrentHashMap<Class<?>, Object> controllersCache = new ConcurrentHashMap<Class<?>, Object>();
+
+    private static Object getControllerInstance(Class<?> clazz) throws InstantiationException, IllegalAccessException {
+        if (Config.isInProductionMode()) {
+            Object cachedController = controllersCache.get(clazz);
+            if (cachedController != null) {
+                return cachedController;
+            } else {
+                synchronized (GlobalHelpers.class) {
+                    cachedController = controllersCache.get(clazz);
+                    if (cachedController != null) {
+                        return cachedController;
+                    } else {
+                        return createController(clazz);
+                    }
+                }
             }
-        });
-        Class<?>[] classes = new Class[files.length];
-        int t = 0;
-        for (File file : files) {
-            String fullClassName = file.getPath().substring(classesDir.length()).replace('/', '.');
-            String substring = fullClassName.substring(0, fullClassName.lastIndexOf('.'));
-            classes[t++] = Thread.currentThread().getContextClassLoader().loadClass(substring);
+        } else {
+            return createController(clazz);
         }
-        return classes;
+    }
+
+    private static Object createController(Class<?> clazz) throws InstantiationException, IllegalAccessException {
+        Object controller = clazz.newInstance();
+        // IoC by name
+        // TODO what about IoC by type?
+        Field field = findInheritedField(controller.getClass(), "app");
+        if (field != null) {
+            field.setAccessible(true);
+            field.set(controller, FrameworkServlet.application);
+        }
+        controllersCache.put(clazz, controller);
+        return controller;
+    }
+
+    public static Action findAction(String className, String action) {
+        if (Config.isInProductionMode()) {
+            return findActionOnProduction(className, action);
+        } else {
+            try {
+                Class<?> clazz = Thread.currentThread().getContextClassLoader().loadClass(className);
+                Method[] methods = clazz.getMethods();
+                Method actionMethod = null;
+                for (Method method : methods) {
+                    if (method.getName().equals(action)) {
+                        actionMethod = method;
+                    }
+                }
+                if (actionMethod != null) {
+                    Action instance = new Action(action, getControllerInstance(clazz), actionMethod);
+                    return instance;
+                } else {
+                    return null;
+                }
+            } catch (ClassNotFoundException e) {
+                return null;
+            } catch (Exception e) {
+                throw new RuntimeException(e.getMessage(), e);
+            }
+        }
     }
 
     public static Field findInheritedField(Class<?> clazz, String name) {

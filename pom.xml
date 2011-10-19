@@ -79,6 +79,20 @@
 		    <version>1.6.2</version>
 		    <scope>provided</scope>
 		</dependency>
+        <!-- Fast reflection -->
+        <dependency>
+		        <groupId>reflectasm</groupId>
+		        <artifactId>reflectasm</artifactId>
+		        <version>1.01</version>
+		        <scope>system</scope>
+		        <systemPath>${project.basedir}/libs/reflectasm-1.01.jar</systemPath>
+		</dependency>
+		<dependency>
+		    <groupId>asm</groupId>
+		    <artifactId>asm</artifactId>
+		    <version>3.3.1</version>
+		</dependency>
+		
 		<!-- MongoDB - uncomment to have MongoDB and Morphia -->
 		<!--
 		<dependency>
