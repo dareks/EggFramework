@@ -29,8 +29,11 @@ public class Config {
     private static volatile long lastChecked;
     private static volatile long lastModified;
 
+    public static final String MODE = "mode";
+    public static final String PRODUCTION_MODE = "production";
+
     static {
-        String mode = System.getProperty("mode");
+        String mode = System.getProperty(MODE);
         if (mode == null) {
             mode = "development";
         }
@@ -94,6 +97,10 @@ public class Config {
     public static boolean isTrue(String key, boolean defaultValue) {
         String bool = get(key, Boolean.toString(defaultValue));
         return bool.trim().equalsIgnoreCase("true");
+    }
+
+    public static boolean isInProductionMode() {
+        return PRODUCTION_MODE.equalsIgnoreCase(get(Config.MODE));
     }
 
 }

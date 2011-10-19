@@ -47,12 +47,12 @@ public class Template {
 
     static {
         try {
-            if ("production".equalsIgnoreCase(config("mode"))) {
+            productionMode = Config.isInProductionMode();
+            if (productionMode) {
                 groovyRunner = new GroovyClassLoaderRunner();
             } else {
                 groovyRunner = new GroovyScriptEngineRunner();
             }
-            productionMode = config("mode", "development").equalsIgnoreCase("production");
             new File("target/generated").mkdirs();
         } catch (Exception e) {
             Loggers.TEMPLATE.error(e.getMessage(), e);

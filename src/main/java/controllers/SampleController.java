@@ -5,6 +5,7 @@ import static framework.GlobalHelpers.*;
 import java.util.HashMap;
 import java.util.Map;
 
+import framework.Config;
 import framework.Response;
 
 /**
@@ -84,6 +85,6 @@ public class SampleController {
      * possible place (controllers, view, services etc.).
      */
     public Response configTest() {
-        return renderText(f("The application is in %s mode", config("mode")));
+        return renderText(f("The application is in %s mode", config(Config.MODE)));
     }
 }
