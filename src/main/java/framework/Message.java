@@ -16,6 +16,7 @@
 package framework;
 
 import java.io.Serializable;
+import java.text.MessageFormat;
 import java.util.ResourceBundle;
 
 /**
@@ -31,27 +32,17 @@ public class Message implements Serializable {
 	private static final ResourceBundle resourceBundle = ResourceBundle.getBundle("messages");
 
 	public final String key;
-	public final String[] args;
+	public final Serializable[] args;
 
-	public Message(String key, Object... args) {
+	public Message(String key, Serializable... args) {
 		this.key = key;
-		if (args != null) {
-			this.args = new String[args.length];
-			for (int i = 0; i < args.length; i++) {
-				this.args[i] = String.valueOf(args[i]);
-			}
-		} else {
-			this.args = new String[0];
-		}
+		this.args = args;
 	}
 
 	public String toString() {
 		if (resourceBundle.containsKey(key)) {
 			String msg = resourceBundle.getString(key);
-			for (int i = 0; i < args.length; i++) {
-				msg = msg.replace("{" + i + "}", args[i]); // TODO optimze this
-			}
-			return msg;
+			return MessageFormat.format(msg, args);
 		} else {
 			return key;
 		}

@@ -16,6 +16,7 @@
 package framework;
 
 import java.io.IOException;
+import java.io.Serializable;
 import java.io.StringWriter;
 import java.io.Writer;
 import java.lang.reflect.Field;
@@ -158,7 +159,7 @@ public class GlobalHelpers {
     }
     
     /** Creates internationalized message */
-    public static Message m(String str, Object... args) {
+    public static Message m(String str, Serializable... args) {
     	return new Message(str, args);
     }
     
