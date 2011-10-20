@@ -156,7 +156,12 @@ public class GlobalHelpers {
     public static String f(String str, Object... args) {
         return String.format(str, args);
     }
-
+    
+    /** Creates internationalized message */
+    public static Message m(String str, Object... args) {
+    	return new Message(str, args);
+    }
+    
     public static Response renderAction(String controller, String action) {
         Response response = new Response();
         response.action = "/" + controller + "/" + action + ".html";
@@ -260,7 +265,7 @@ public class GlobalHelpers {
     }
 
     public static <T> T session(String name) {
-        return FrontController.threadData.get().session.get(name);
+        return (T) FrontController.threadData.get().session.get(name);
     }
 
     public static <T> Session session(String name, T value) {
