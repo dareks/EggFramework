@@ -58,6 +58,14 @@ public class ThreadData {
         this.out = out;
     }
 
+    public void addHeader(String name, String value) {
+        this.resp.addHeader(name, value);
+    }
+
+    public void setHeader(String name, String value) {
+        this.resp.setHeader(name, value);
+    }
+
     public Writer getOut() {
         if (out == null) {
             try {

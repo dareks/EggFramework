@@ -24,6 +24,7 @@ import java.math.BigDecimal;
 import java.net.URLEncoder;
 import java.util.Arrays;
 import java.util.Collection;
+import java.util.Collections;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
@@ -33,6 +34,7 @@ import java.util.concurrent.ConcurrentHashMap;
 
 import javax.servlet.AsyncContext;
 import javax.servlet.http.Cookie;
+import javax.servlet.http.HttpServletRequest;
 
 import org.apache.commons.beanutils.BeanUtils;
 import org.codehaus.jackson.map.ObjectMapper;
@@ -229,6 +231,26 @@ public class GlobalHelpers {
 
     public static <T> T attr(String key) {
         return (T) req().get(key);
+    }
+
+    public static String header(String name) {
+        // TODO Move this code somewhere else
+        return req().getRequest().getHeader(name);
+    }
+
+    public static List<String> headers(String name) {
+        // TODO Move this code somewhere else
+        HttpServletRequest req = req().getRequest();
+        return Collections.list(req.getHeaders(name));
+    }
+
+    /** Replace header with given name */
+    public static void header(String name, String value) {
+        FrontController.threadData.get().setHeader(name, value);
+    }
+
+    public static void addHeader(String name, String value) {
+        FrontController.threadData.get().addHeader(name, value);
     }
 
     public static Flash flash(String key, Object value) {
