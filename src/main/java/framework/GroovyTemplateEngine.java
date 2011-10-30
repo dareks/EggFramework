@@ -15,7 +15,9 @@
  */
 package framework;
 
+import java.io.File;
 import java.io.FileNotFoundException;
+import java.io.FileWriter;
 import java.io.IOException;
 import java.io.Reader;
 import java.io.Writer;
@@ -49,7 +51,7 @@ public class GroovyTemplateEngine implements TemplateEngine {
         }
     }
 
-    public void run(String groovySourceFile, Map<String, Object> model) throws Exception {
+    public void run(String template, String groovySourceFile, Map<String, Object> model) throws Exception {
         Binding binding = new Binding();
         if (model != null) {
             for (String key : model.keySet()) {
@@ -59,14 +61,16 @@ public class GroovyTemplateEngine implements TemplateEngine {
         groovyRunner.run(groovySourceFile, binding);
     }
 
-    public void generate(Reader reader, Writer writer) throws FileNotFoundException, IOException {
+    public void generate(String name, Reader reader, File outputFile) throws FileNotFoundException, IOException {
         List<String> imports = IOUtils.readLines(Template.class.getResourceAsStream("/imports.groovy"));
-        for (String line : imports) {
-            writer.append(line).append('\n');
-        }
-        writer.append("framework.ThreadData data = framework.FrontController.threadData.get()\n");
-        writer.append("Writer out = data.out\n");
+        FileWriter writer = new FileWriter(outputFile);
         try {
+            for (String line : imports) {
+                writer.append(line).append('\n');
+            }
+            writer.append("framework.ThreadData data = framework.FrontController.threadData.get()\n");
+            writer.append("Writer out = data.out\n");
+
             int s = 0;
             int ch = -1;
             writer.append("out.write '");
@@ -122,6 +126,7 @@ public class GroovyTemplateEngine implements TemplateEngine {
             }
         } finally {
             reader.close();
+            writer.close();
         }
     }
 

@@ -20,7 +20,6 @@ import static framework.GlobalHelpers.*;
 import java.io.File;
 import java.io.FileNotFoundException;
 import java.io.FileReader;
-import java.io.FileWriter;
 import java.io.IOException;
 import java.io.Writer;
 import java.net.URISyntaxException;
@@ -56,7 +55,7 @@ public class Template {
         }
         String groovySourceFile = generateSourceFile(template);
         long started = System.nanoTime();
-        templateEngine.run(groovySourceFile, model);
+        templateEngine.run(template, groovySourceFile, model);
         Loggers.BENCHMARK.info("Template {} rendering time is {} us", template, (System.nanoTime() - started) / 1000);
     }
 
@@ -79,13 +78,9 @@ public class Template {
         // production
         // mode (performance optimization)
         if (date == null || (!productionMode && date < lastModified)) {
-            FileWriter generatedSourceWriter = new FileWriter(groovySourceFile);
-            try {
-                FileReader reader = new FileReader(file);
-                templateEngine.generate(reader, generatedSourceWriter);
-            } finally {
-                generatedSourceWriter.close();
-            }
+            File generatedSourceFile = new File(groovySourceFile);
+            FileReader reader = new FileReader(file);
+            templateEngine.generate(template, reader, generatedSourceFile);
             filemodificationDates.put(name, lastModified);
         }
         return groovySourceFile;

@@ -15,18 +15,18 @@
  */
 package framework;
 
+import java.io.File;
 import java.io.FileNotFoundException;
 import java.io.IOException;
 import java.io.Reader;
-import java.io.Writer;
 import java.util.Map;
 
 public interface TemplateEngine {
 
-    void generate(Reader reader, Writer writer) throws FileNotFoundException, IOException;
+    void generate(String path, Reader reader, File outputFile) throws FileNotFoundException, IOException;
 
     String getFileExtension();
 
-    void run(String file, Map<String, Object> model) throws Exception;
+    void run(String template, String file, Map<String, Object> model) throws Exception;
 
 }
