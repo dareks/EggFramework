@@ -21,6 +21,8 @@ import java.io.FileReader;
 import java.io.IOException;
 import java.util.Properties;
 
+import javax.servlet.ServletContext;
+
 public class Config {
 
     private static final String FILENAME_PREFIX = "WEB-INF/config";
@@ -58,7 +60,12 @@ public class Config {
     }
 
     private static File getFile() {
-        return new File(FrameworkServlet.SERVLET_CONTEXT.getRealPath(filename));
+        ServletContext ctx = FrameworkServlet.SERVLET_CONTEXT;
+        if (ctx != null) {
+            return new File(ctx.getRealPath(filename));
+        } else {
+            return new File("src/main/webapp/" + filename);
+        }
     }
 
     private static void load() {
