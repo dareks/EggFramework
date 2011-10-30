@@ -15,8 +15,6 @@
  */
 package framework;
 
-//import groovy.lang.Binding;
-//import groovy.util.GroovyScriptEngine;
 import static framework.GlobalHelpers.*;
 
 import java.io.File;
@@ -28,35 +26,21 @@ import java.io.Writer;
 import java.net.URISyntaxException;
 import java.net.URL;
 import java.util.Hashtable;
-import java.util.List;
 import java.util.Map;
-
-import org.apache.commons.io.IOUtils;
-
-import framework.GroovyRunner.GroovyClassLoaderRunner;
-import framework.GroovyRunner.GroovyScriptEngineRunner;
-import groovy.lang.Binding;
 
 public class Template {
 
     private static Map<String, Long> filemodificationDates = new Hashtable<String, Long>();
 
-    private static GroovyRunner groovyRunner;
-
+    private static TemplateEngine templateEngine;
+    private static String fileExtension;
     private static boolean productionMode;
 
     static {
-        try {
-            productionMode = Config.isInProductionMode();
-            if (productionMode) {
-                groovyRunner = new GroovyClassLoaderRunner();
-            } else {
-                groovyRunner = new GroovyScriptEngineRunner();
-            }
-            new File("target/generated").mkdirs();
-        } catch (Exception e) {
-            Loggers.TEMPLATE.error(e.getMessage(), e);
-        }
+        productionMode = Config.isInProductionMode();
+        new File("target/generated").mkdirs();
+        templateEngine = new GroovyTemplateEngine();
+        fileExtension = templateEngine.getFileExtension();
     }
 
     public static boolean exists(String template) {
@@ -71,19 +55,13 @@ public class Template {
             new File("target/generated/" + template.substring(0, template.lastIndexOf("/"))).mkdirs();
         }
         String groovySourceFile = generateSourceFile(template);
-        Binding binding = new Binding();
-        if (model != null) {
-            for (String key : model.keySet()) {
-                binding.setVariable(key, model.get(key));
-            }
-        }
         long started = System.nanoTime();
-        groovyRunner.run(groovySourceFile, binding);
+        templateEngine.run(groovySourceFile, model);
         Loggers.BENCHMARK.info("Template {} rendering time is {} us", template, (System.nanoTime() - started) / 1000);
     }
 
     private static String generateSourceFile(String template) throws IOException, FileNotFoundException, URISyntaxException {
-        String groovySourceFile = "target/generated/" + template + ".groovy";
+        String groovySourceFile = "target/generated/" + template + "." + fileExtension;
         if (!template.startsWith("/")) { // use indexOf instead
             template = "/" + template;
         }
@@ -94,7 +72,7 @@ public class Template {
 
         final String name = url.getFile();
         Long date = filemodificationDates.get(name);
-        // TODO Add checking if importers.groovy was modified - then flush all cache
+        // TODO Add checking if imports.groovy was modified - then flush all cache
         File file = new File(url.toURI());
         long lastModified = !productionMode ? file.lastModified() : -1; // omit lastModified() method
                                                                         // call in
@@ -103,7 +81,8 @@ public class Template {
         if (date == null || (!productionMode && date < lastModified)) {
             FileWriter generatedSourceWriter = new FileWriter(groovySourceFile);
             try {
-                parse(file, generatedSourceWriter);
+                FileReader reader = new FileReader(file);
+                templateEngine.generate(reader, generatedSourceWriter);
             } finally {
                 generatedSourceWriter.close();
             }
@@ -112,82 +91,4 @@ public class Template {
         return groovySourceFile;
     }
 
-    private static void parse(File file, Writer writer) throws FileNotFoundException, IOException {
-        List<String> imports = IOUtils.readLines(Template.class.getResourceAsStream("/imports.groovy"));
-        for (String line : imports) {
-            writer.append(line).append('\n');
-        }
-        writer.append("framework.ThreadData data = framework.FrontController.threadData.get()\n");
-        writer.append("Writer out = data.out\n");
-        FileReader reader = new FileReader(file);
-        try {
-            int s = 0;
-            int ch = -1;
-            writer.append("out.write '");
-            while ((ch = reader.read()) != -1) {
-                if (ch == '<' && s == 0) {
-                    s = 1;
-                    writer.append("'\n");
-                } else if (ch == '%' && s == 1) {
-                    s = 2;
-                } else if (s == 1) {
-                    s = 0;
-                    writer.append("out.write '<");
-                    addChar(writer, s, ch);
-                } else if (ch == '=' && s == 2) {
-                    s = 3;
-                    writer.append("out.write '' + (");
-                } else if (s == 2) {
-                    s = 6;
-                    addChar(writer, s, ch);
-                } else if (ch == '%' && s == 6) {
-                    s = 4;
-                } else if (ch == '%' && s == 3) {
-                    s = 5;
-                } else if (ch == '>' && s == 4) {
-                    s = 0;
-                    writer.append("\nout.write '");
-                } else if (ch == '>' && s == 5) {
-                    s = 0;
-                    writer.append(")\nout.write '");
-                } else if (s == 4) {
-                    s = 2;
-                    writer.append('%');
-                } else if (s == 5) {
-                    s = 3;
-                    writer.append('%');
-                } else if (ch == '\n') {
-                    if (s == 0) {
-                        writer.append("\\n'\nout.write '");
-                    } else {
-                        writer.append(" ");
-                    }
-                    s = 0;
-                } else if (ch == '\r') {
-                    if (s != 0) {
-                        writer.append(" ");
-                    }
-                } else {
-                    addChar(writer, s, ch);
-                }
-            }
-            if (s == 0) {
-                writer.append("'");
-            }
-        } finally {
-            reader.close();
-        }
-    }
-
-    private static void addChar(Writer writer, int s, int ch) throws IOException {
-        if (ch == '\'' && s != 3 && s != 6) {
-            writer.append("\\'");
-        } else if (ch == '\\') {
-            writer.append("\\\\");
-        } else if (ch == '$') {
-            writer.append("\\$");
-        } else {
-            writer.write(ch);
-        }
-    }
 }
