@@ -12,5 +12,6 @@ public class Loggers {
     public static final Logger TEMPLATE = LoggerFactory.getLogger("framework.Template");
     public static final Logger SERVER = LoggerFactory.getLogger("framework.Server");
     public static final Logger RELOADER = LoggerFactory.getLogger("framework.Reloader");
+    public static final Logger CACHE = LoggerFactory.getLogger("framework.Cache");
 
 }

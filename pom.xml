@@ -93,6 +93,13 @@
 		    <version>3.3.1</version>
 		</dependency>
 		
+		<!-- Used for caching -->
+		<dependency>
+		    <groupId>com.googlecode.concurrentlinkedhashmap</groupId>
+		    <artifactId>concurrentlinkedhashmap-lru</artifactId>
+		    <version>1.2</version>
+		</dependency>
+		
 		<!-- MongoDB - uncomment to have MongoDB and Morphia -->
 		<!--
 		<dependency>
