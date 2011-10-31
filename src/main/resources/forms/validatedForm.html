@@ -11,6 +11,7 @@
 	</ul>
 	<form action="<%= action('createUser') %>">
 		<label for="name">Name*</label>							<input type="text" name="name" value="<%= form.name %>" />				<br />		
+		<label for="email">Email</label>						<input type="text" name="email" value="<%= form.email %>" />			<br />		
 		<label for="street">Street*</label>						<input type="text" name="street" value="<%= form.street %>" />			<br />
 		<label for="postalCode">Postal code (xx-xxx)</label>	<input type="text" name="postalCode" value="<%= form.postalCode %>" />	<br />
 		<label for="city">City</label>							<input type="text" name="city" value="<%= form.city %>" />				<br />

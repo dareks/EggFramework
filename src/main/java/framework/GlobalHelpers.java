@@ -48,6 +48,7 @@ import framework.validation.ActionValidationConfig;
 import framework.validation.DecimalNumberValidator;
 import framework.validation.Errors;
 import framework.validation.ObjectValidationConfig;
+import framework.validation.RegexpValidator;
 import framework.validation.Validator;
 import groovy.lang.Closure;
 
@@ -389,6 +390,18 @@ public class GlobalHelpers {
         }
     }
 
+    public static Validator email(String field) {
+        return registerValidator(field, emailValidator);
+    }
+
+    public static void email(String... fields) {
+        if (fields != null) {
+            for (String field : fields) {
+                email(field);
+            }
+        }
+    }
+
     public static Validator length(String field, int min, int max) {
         return registerValidator(field, lengthValidator(min, max));
     }
@@ -436,6 +449,8 @@ public class GlobalHelpers {
     public static Errors validateParam(String name, Validator... validators) {
         return validate(name, param(name), validators);
     }
+
+    public static final Validator emailValidator = new RegexpValidator("^(.+)@(.+)$", "errors.email");
 
     public static final Validator requiredValidator = new Validator() {
 

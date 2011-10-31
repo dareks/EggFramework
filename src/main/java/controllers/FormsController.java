@@ -42,6 +42,7 @@ public class FormsController {
             required("name", "street"); // name and street parameters are required which means that they shouldn't be
                                         // null or empty
             registerValidator("postalCode", new PostalCodeValidator()); // for postalCode parameter use custom validator
+            email("email");
         }
 
         public String name = "";
@@ -49,6 +50,7 @@ public class FormsController {
         public String postalCode = "";
         public String city = "";
         public String country = "";
+        public String email = "";
 
     }
 
