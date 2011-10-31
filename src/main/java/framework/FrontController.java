@@ -40,6 +40,7 @@ public class FrontController {
     public static final ThreadLocal<ThreadData> threadData = new ThreadLocal<ThreadData>();
 
     public void service(HttpServletRequest req, HttpServletResponse res, ServletContext ctx, Routing routing) throws ServletException, IOException {
+        req.setCharacterEncoding("utf-8");
         res.setCharacterEncoding("utf-8");
         String path = (String) req.getAttribute(ACTION_URI);
         if (path == null) {
