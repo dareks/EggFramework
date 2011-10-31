@@ -21,31 +21,38 @@ import java.util.ResourceBundle;
 
 /**
  * Internationalized String. Should be used instead of java.lang.String when you want it to be translated during
- * rendering of the page.<br /><br />
+ * rendering of the page.<br />
+ * <br />
  * 
  * TODO Add reloading of messages - see toString() method. Maybe use Groovy ConfigSlurper instead
  */
 public class Message implements Serializable {
 
-	private static final long serialVersionUID = 1L;
+    private static final long serialVersionUID = 1L;
 
-	private static final ResourceBundle resourceBundle = ResourceBundle.getBundle("messages");
+    private static final ResourceBundle resourceBundle = ResourceBundle.getBundle("messages");
 
-	public final String key;
-	public final Serializable[] args;
+    public final String key;
+    public final Serializable[] args;
 
-	public Message(String key, Serializable... args) {
-		this.key = key;
-		this.args = args;
-	}
+    public Message(String key, Serializable... args) {
+        this.key = key;
+        for (int t = 0; t < args.length; t++) {
+            String fieldKey = "field." + String.valueOf(args[t]);
+            if (resourceBundle.containsKey(fieldKey)) {
+                args[t] = resourceBundle.getString(fieldKey);
+            }
+        }
+        this.args = args;
+    }
 
-	public String toString() {
-		if (resourceBundle.containsKey(key)) {
-			String msg = resourceBundle.getString(key);
-			return MessageFormat.format(msg, args);
-		} else {
-			return key;
-		}
-	}
+    public String toString() {
+        if (resourceBundle.containsKey(key)) {
+            String msg = resourceBundle.getString(key);
+            return MessageFormat.format(msg, args);
+        } else {
+            return key;
+        }
+    }
 
 }

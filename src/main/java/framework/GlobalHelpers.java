@@ -159,12 +159,12 @@ public class GlobalHelpers {
     public static String f(String str, Object... args) {
         return String.format(str, args);
     }
-    
+
     /** Creates internationalized message */
     public static Message m(String str, Serializable... args) {
-    	return new Message(str, args);
+        return new Message(str, args);
     }
-    
+
     public static Response renderAction(String controller, String action) {
         Response response = new Response();
         response.action = "/" + controller + "/" + action + ".html";
@@ -441,12 +441,12 @@ public class GlobalHelpers {
 
         public void validates(String field, Object value, Errors errors) {
             if (value == null) {
-                errors.add(field, field + " is required");
+                errors.add(field, m("errors.required", field));
             }
             if (value instanceof String) {
                 String str = (String) value;
                 if (str.trim().isEmpty()) {
-                    errors.add(field, field + " is required");
+                    errors.add(field, m("errors.required", field));
                 }
             }
         }
@@ -475,7 +475,7 @@ public class GlobalHelpers {
                         return;
                     }
                 }
-                errors.add(field, field + " is not one of: " + values);
+                errors.add(field, m("errors.enum", field, values));
             }
 
         }
@@ -496,7 +496,7 @@ public class GlobalHelpers {
             if (min > 0) {
                 String str = String.valueOf(value);
                 if (value == null || str.length() < min || str.length() > max) {
-                    errors.add(field, field + f(" has invalid length. Should be %d-%d", min, max));
+                    errors.add(field, m("errors.length", field, min, max));
                 }
             }
         }

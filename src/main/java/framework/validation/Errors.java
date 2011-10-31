@@ -24,20 +24,22 @@ import com.google.common.collect.ImmutableList;
 import com.google.common.collect.Lists;
 import com.google.common.collect.Maps;
 
+import framework.Message;
+
 public class Errors {
 
-    private Map<String, List<String>> messages = Maps.newHashMap();
+    private Map<String, List<Message>> messages = Maps.newHashMap();
 
     public boolean hasErrors() {
         return messages.size() > 0;
     }
 
-    public synchronized void add(String msg) {
+    public synchronized void add(Message msg) {
         add(null, msg);
     }
 
-    public synchronized void add(String field, String msg) {
-        List<String> list = messages.get(field);
+    public synchronized void add(String field, Message msg) {
+        List<Message> list = messages.get(field);
         if (list == null) {
             list = Lists.newArrayList();
             messages.put(field, list);
@@ -45,8 +47,8 @@ public class Errors {
         list.add(msg);
     }
 
-    public synchronized void add(String field, List<String> msg) {
-        List<String> list = messages.get(field);
+    public synchronized void add(String field, List<Message> msg) {
+        List<Message> list = messages.get(field);
         if (list == null) {
             list = Lists.newArrayList();
             messages.put(field, list);
@@ -54,22 +56,22 @@ public class Errors {
         list.addAll(msg);
     }
 
-    public Map<String, List<String>> getMessagesMap() {
+    public Map<String, List<Message>> getMessagesMap() {
         return messages;
     }
 
-    public List<String> getMessages() {
+    public List<Message> getMessages() {
         // TODO cache this method
-        List<String> msgs = Lists.newArrayList();
-        Collection<List<String>> values = messages.values();
-        for (List<String> list : values) {
+        List<Message> msgs = Lists.newArrayList();
+        Collection<List<Message>> values = messages.values();
+        for (List<Message> list : values) {
             msgs.addAll(list);
         }
         return Collections.unmodifiableList(msgs);
     }
 
-    public List<String> getMessages(String field) {
-        List<String> list = messages.get(field);
+    public List<Message> getMessages(String field) {
+        List<Message> list = messages.get(field);
         if (list == null) {
             return ImmutableList.of();
         }

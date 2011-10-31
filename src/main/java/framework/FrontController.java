@@ -72,7 +72,12 @@ public class FrontController {
             data.request.set("errors", errors);
             data.request.set("params", data.params);
             data.request.set("messages", new ArrayList<String>());
-            data.flash.loadFromSession(req);
+            if (req.getAttribute(Flash.FLASH_ATTRIBUTE) == null) {
+                data.flash.loadFromSession(req);
+            } else {
+                data.flash = (Flash) req.getAttribute(Flash.FLASH_ATTRIBUTE);
+            }
+            req.setAttribute(Flash.FLASH_ATTRIBUTE, data.flash);
             data.request.set("session", data.session);
             initClass(request.getController());
             Response response = runBefore(request.getController(), data);
@@ -149,9 +154,11 @@ public class FrontController {
 
     private void sendRedirect(HttpServletResponse res, ThreadData data, Response response) throws IOException {
         if (data.flash.hasCurrentAttributes()) {
-            res.sendRedirect(appendParams(response.redirect, map(Flash.FLASHID_PARAM, data.flash.flashId)));
+            data.request.getRequest().getSession(); // ugly hack - session need to be created before redirect url is
+                                                    // created
+            res.sendRedirect(res.encodeRedirectURL(appendParams(response.redirect, map(Flash.FLASHID_PARAM, data.flash.flashId))));
         } else {
-            res.sendRedirect(response.redirect);
+            res.sendRedirect(res.encodeRedirectURL(response.redirect));
         }
     }
 

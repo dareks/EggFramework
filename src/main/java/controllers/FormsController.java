@@ -62,7 +62,7 @@ public class FormsController {
                                                                             // is not empty
                 String val = value.toString();
                 if (!val.matches("\\d\\d-\\d\\d\\d")) {
-                    errors.add(field, field + " has wrong format"); // add error message for field
+                    errors.add(field, m("errors.postalCode"));
                 }
             }
         }

@@ -29,7 +29,7 @@ public class ThreadData {
     public final Request request;
     public final Params params = new Params();
     public final Session session = new Session();
-    public final Flash flash = new Flash();
+    public Flash flash = new Flash();
     public final Cookies cookies = new Cookies();
     public HttpServletResponse resp;
     private Writer out;

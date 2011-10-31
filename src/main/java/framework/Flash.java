@@ -27,6 +27,7 @@ public class Flash {
 
     public static final String SESSION_PREFIX = "__flash_";
     public static final String FLASHID_PARAM = "__flashid";
+    public static final String FLASH_ATTRIBUTE = "__flash";
     private Map<String, Object> previous = new HashMap<String, Object>(2);
     private Map<String, Object> current = new HashMap<String, Object>(2);
     public final long flashId;

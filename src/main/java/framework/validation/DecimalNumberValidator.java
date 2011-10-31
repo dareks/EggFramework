@@ -15,6 +15,8 @@
  */
 package framework.validation;
 
+import static framework.GlobalHelpers.*;
+
 public class DecimalNumberValidator implements Validator {
 
     private long min;
@@ -28,16 +30,16 @@ public class DecimalNumberValidator implements Validator {
             try {
                 Long number = Long.valueOf((String) value);
                 if (number < min) {
-                    errors.add(field, field + " is lower than " + min);
+                    errors.add(field, m("errors.decimal.lower", field, min));
                 }
                 if (number > max) {
-                    errors.add(field, field + " is higher than " + max);
+                    errors.add(field, m("errors.decimal.higher", field, max));
                 }
                 return;
             } catch (IllegalArgumentException e) {
             }
         }
-        errors.add(field, field + " is not an integer number");
+        errors.add(field, m("errors.decimal.nan", field));
     }
 
     public DecimalNumberValidator min(long min) {
