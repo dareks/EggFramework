@@ -80,6 +80,8 @@ public class GroovyTemplateEngine implements TemplateEngine {
                     writer.append("'\n");
                 } else if (ch == '%' && s == 1) {
                     s = 2;
+                } else if (ch == '#' && s == 2) {
+                    s = 7;
                 } else if (s == 1) {
                     s = 0;
                     writer.append("out.write '<");
@@ -90,10 +92,15 @@ public class GroovyTemplateEngine implements TemplateEngine {
                 } else if (s == 2) {
                     s = 6;
                     addChar(writer, s, ch);
+                } else if (ch == '%' && s == 7) {
+                    s = 8;
                 } else if (ch == '%' && s == 6) {
                     s = 4;
                 } else if (ch == '%' && s == 3) {
                     s = 5;
+                } else if (ch == '>' && s == 8) {
+                    s = 0;
+                    writer.append("out.write '");
                 } else if (ch == '>' && s == 4) {
                     s = 0;
                     writer.append("\nout.write '");
@@ -117,7 +124,7 @@ public class GroovyTemplateEngine implements TemplateEngine {
                     if (s != 0) {
                         writer.append(" ");
                     }
-                } else {
+                } else if (s != 7) {
                     addChar(writer, s, ch);
                 }
             }
