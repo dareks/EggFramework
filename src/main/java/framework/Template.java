@@ -34,10 +34,12 @@ public class Template {
     private static TemplateEngine templateEngine;
     private static String fileExtension;
     private static boolean productionMode;
+    private static File generatedDir;
 
     static {
         productionMode = Config.isInProductionMode();
-        new File("target/generated").mkdirs();
+        generatedDir = productionMode ? new File(System.getProperty("java.io.tmpdir") + File.separatorChar + "generated" + File.separatorChar +  Config.get("app.url").replace(File.separatorChar, '_')) : new File("target/generated");
+        generatedDir.mkdirs();
         templateEngine = new GroovyTemplateEngine();
         fileExtension = templateEngine.getFileExtension();
     }
@@ -51,16 +53,16 @@ public class Template {
             template = req().getController() + "/" + template;
         }
         if (template.contains("/")) {
-            new File("target/generated/" + template.substring(0, template.lastIndexOf("/"))).mkdirs();
+        	new File(generatedDir, template.substring(0, template.lastIndexOf("/"))).mkdirs();
         }
-        String groovySourceFile = generateSourceFile(template);
+        String sourceFile = generateSourceFile(template);
         long started = System.nanoTime();
-        templateEngine.run(template, groovySourceFile, model);
+        templateEngine.run(template, sourceFile, model);
         Loggers.BENCHMARK.info("Template {} rendering time is {} us", template, (System.nanoTime() - started) / 1000);
     }
 
     private static String generateSourceFile(String template) throws IOException, FileNotFoundException, URISyntaxException {
-        String groovySourceFile = "target/generated/" + template + "." + fileExtension;
+        File generatedSourceFile = new File(generatedDir, template + "." + fileExtension);
         if (!template.startsWith("/")) { // use indexOf instead
             template = "/" + template;
         }
@@ -78,12 +80,11 @@ public class Template {
         // production
         // mode (performance optimization)
         if (date == null || (!productionMode && date < lastModified)) {
-            File generatedSourceFile = new File(groovySourceFile);
             FileReader reader = new FileReader(file);
             templateEngine.generate(template, reader, generatedSourceFile);
             filemodificationDates.put(name, lastModified);
         }
-        return groovySourceFile;
+        return generatedSourceFile.getPath();
     }
 
 }
