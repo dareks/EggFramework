@@ -21,6 +21,7 @@ import java.io.File;
 import java.io.FileNotFoundException;
 import java.io.FileReader;
 import java.io.IOException;
+import java.io.InputStreamReader;
 import java.io.Writer;
 import java.net.URISyntaxException;
 import java.net.URL;
@@ -74,13 +75,16 @@ public class Template {
         final String name = url.getFile();
         Long date = filemodificationDates.get(name);
         // TODO Add checking if imports.groovy was modified - then flush all cache
-        File file = new File(url.toURI());
-        long lastModified = !productionMode ? file.lastModified() : -1; // omit lastModified() method
-                                                                        // call in
-        // production
-        // mode (performance optimization)
+        long lastModified = -1;
+        if (!productionMode) {
+        	try {
+        		lastModified = new File(url.toURI()).lastModified();
+        	} catch(URISyntaxException e) {
+        		lastModified = new File(url.getPath()).lastModified();
+        	}
+        }
         if (date == null || (!productionMode && date < lastModified)) {
-            FileReader reader = new FileReader(file);
+        	InputStreamReader reader = new InputStreamReader(url.openStream()); // TODO Close stream/reader
             templateEngine.generate(template, reader, generatedSourceFile);
             filemodificationDates.put(name, lastModified);
         }
