@@ -77,7 +77,6 @@
 		    <groupId>org.slf4j</groupId>
 		    <artifactId>slf4j-simple</artifactId>
 		    <version>1.6.2</version>
-		    <scope>provided</scope>
 		</dependency>
         <!-- Fast reflection -->
         <dependency>

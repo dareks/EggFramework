@@ -130,7 +130,7 @@ public class GlobalHelpers {
     }
 
     public static String resource(String name) {
-        return String.format("%s%s%s", Config.get("app.url"), "resources/", name);
+        return String.format("%s%s%s", Config.get("app.url"), "/resources/", name);
     }
 
     public static String config(String key) {
