@@ -81,11 +81,9 @@
 		</dependency>
         <!-- Fast reflection -->
         <dependency>
-		        <groupId>reflectasm</groupId>
-		        <artifactId>reflectasm</artifactId>
+		        <groupId>com.googlecode</groupId>
+			    <artifactId>reflectasm</artifactId>
 		        <version>1.01</version>
-		        <scope>system</scope>
-		        <systemPath>${project.basedir}/libs/reflectasm-1.01.jar</systemPath>
 		</dependency>
 		<dependency>
 		    <groupId>asm</groupId>
