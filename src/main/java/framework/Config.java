@@ -40,7 +40,7 @@ public class Config {
     static {
         String mode = System.getProperty(MODE);
         if (mode == null) {
-            mode = DEVELOPMENT_MODE;
+            mode = PRODUCTION_MODE;
         }
         filename = FILENAME_PREFIX + "_" + mode + ".properties";
         load();
